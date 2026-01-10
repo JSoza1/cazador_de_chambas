@@ -128,6 +128,12 @@ python main.py
 ```
 El bot detectará automáticamente que está en Android y usará la configuración especial.
 
+### 🔋 Tips para que NO se duerma Termux (Importante)
+Android mata los procesos en segundo plano para ahorrar batería. Para evitar que el bot se apague a las pocas horas:
+
+1.  **Activar Wakelock:** Baja la barra de notificaciones de Android, busca la de Termux, expándela y pulsa **"Acquire wakelock"**.
+2.  **Quitar Restricciones:** Ve a *Ajustes > Batería > Optimización de batería*, busca **Termux** y selecciona **"No optimizar"** o "Sin restricciones".
+
 ---
 
 Hecho por **Jsoza**
