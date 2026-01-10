@@ -46,7 +46,8 @@ def get_driver():
             print("📱 Detectado entorno Android (Termux)")
             # En Termux se requiere especificación de rutas manuales
             from selenium.webdriver.chrome.service import Service
-            chrome_options.binary_location = "/data/data/com.termux/files/usr/bin/chromium"
+            # Actualización: En termux moderno el binario suele ser chromium-browser
+            chrome_options.binary_location = "/data/data/com.termux/files/usr/bin/chromium-browser"
             service = Service("/data/data/com.termux/files/usr/bin/chromedriver")
             driver = webdriver.Chrome(service=service, options=chrome_options)
         else:
