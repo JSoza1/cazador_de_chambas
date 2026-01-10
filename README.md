@@ -20,7 +20,8 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 ## ⚙️ Tecnologías Utilizadas
 
 *   **Python 3.10+**: Lenguaje principal.
-*   **Selenium WebDriver**: Automatización del navegador (Chrome).
+*   **Selenium WebDriver**: Automatización del navegador.
+*   **Termux (Android) / Linux**: Entorno de ejecución móvil.
 *   **Requests**: Comunicación HTTP para envío de mensajes a Telegram.
 *   **Python-Dotenv**: Gestión segura de variables de entorno.
 *   **Git**: Control de versiones.
@@ -49,21 +50,83 @@ job-search/
 
 ---
 
-## 🛠️ Instalación y Configuración
+## 📲 Configuración de Notificaciones (Telegram)
+
+Para que el bot te avise al celular, necesitas dos datos sencillos:
+
+1.  **Crear el Bot:**
+    *   Abre Telegram y busca a **@BotFather**.
+    *   Envía el comando `/newbot`.
+    *   Sigue las instrucciones (ponle nombre y usuario).
+    *   Te dará un **TOKEN** (ej: `123456:ABC-DEF...`). Guárdalo.
+
+2.  **Obtener tu ID:**
+    *   Busca a **@userinfobot** en Telegram.
+    *   Dale a "Iniciar" o envía cualquier mensaje.
+    *   Te responderá con tu ID numérico (ej: `987654321`).
+
+3.  **Configurar:**
+    *   Pon estos datos en tu archivo `.env` en los campos `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`.
+    *   ⚠️ **Importante:** Debes enviar un mensaje "Hola" a tu nuevo bot para inicializar la conversación antes de ejecutar el script.
+
+---
+
+## 🛠️ Instalación en PC (Windows/Linux)
 
 ### 1. Prerrequisitos
 Se requiere tener instalado **Python** y **Google Chrome**.
 
-### 2. Instalar Dependencias
-Abrir una terminal en la carpeta del proyecto y ejecutar:
-```bash
-pip install -r requirements.txt
-```
-(Incluye `selenium`, `requests` y `python-dotenv`).
+### 2. Pasos
+1.  Clonar el repositorio.
+2.  Instalar dependencias: `pip install -r requirements.txt`
+3.  Crear `.env` basándose en `.env.example`.
 
-### 3. Configurar Credenciales (.env)
-1.  Crear un archivo llamado `.env` en la raíz del proyecto.
-2.  Configurar las variables de entorno de .env.example.
+---
+
+## 📱 Instalación en Android (Termux)
+
+Guía paso a paso para convertir un celular en un servidor de búsqueda.
+
+### 1. Preparación de Termux
+Descargar Termux desde **F-Droid** (no Play Store). Ejecutar los siguientes comandos:
+
+```bash
+# Actualizar sistema
+pkg update -y && pkg upgrade -y
+
+# Instalar herramientas básicas
+pkg install python git nano -y
+
+# Habilitar repositorio de terceros (Necesario para Chromium headless)
+pkg install tur-repo -y
+
+# Instalar dependencias gráficas (Evita errores de gtk3)
+pkg install x11-repo -y
+
+# Instalar Chromium
+pkg install chromium-browser -y
+```
+
+### 2. Configuración del Proyecto
+```bash
+# Clonar repositorio
+git clone https://github.com/Jsoza1/cazador_de_chambas.git
+cd cazador_de_chambas
+
+# Instalar librerías Python
+pip install -r requirements.txt
+
+# Configurar Secretos (Manual)
+cp .env.example .env
+nano .env
+# (Aquí debes borrar los ejemplos y escribir tus claves reales. Ctrl+O para guardar, Ctrl+X para salir)
+```
+
+### 3. Ejecutar
+```bash
+python main.py
+```
+El bot detectará automáticamente que está en Android y usará la configuración especial.
 
 ---
 
