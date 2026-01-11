@@ -1,6 +1,6 @@
 # 🤖 Cazador De Chambas
 
-Este proyecto es un sistema automatizado diseñado para buscar y postular a empleos en diversas plataformas (**Bumeran** y **Computrabajo**). Está construido en Python utilizando **Selenium** para la automatización del navegador.
+Este proyecto es un sistema automatizado diseñado para buscar y postular a empleos en diversas plataformas (**Bumeran**, **Computrabajo** y **Andreani**). Está construido en Python utilizando **Selenium** para la automatización del navegador.
 
 El objetivo de este código no es solo funcional, sino **educativo**. Está documentado extensamente para explicar cómo funciona cada parte.
 
@@ -8,10 +8,10 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 
 ## 🚀 Características
 
-*   **Multi-Sitio**: Compatible con Bumeran y Computrabajo.
+*   **Multi-Sitio**: Compatible con Bumeran, Computrabajo y Andreani.
 *   **Notificaciones en Tiempo Real**: Envía alertas a **Telegram** cada vez que encuentra una oferta interesante.
 *   **Modular y Escalable**: Estructura preparada para agregar más sitios (LinkedIn, etc.) sin reescribir el núcleo.
-*   **Filtrado Inteligente**: Ignora ofertas no aplicables y duplicadas.
+*   **Filtrado Inteligente (Regex)**: Ignora ofertas no aplicables y duplicadas, distinguiendo palabras completas (ej: diferencia 'Sr' de 'Ssr').
 *   **Seguro**: Uso de variables de entorno para la protección de credenciales.
 *   **Portable**: Diseñado pensando en su futura migración a servidores o dispositivos Android (vía Termux).
 
@@ -44,6 +44,7 @@ job-search/
     ├── driver.py          # 🚗 MOTOR: Maneja el navegador (Chrome) y modos Headless.
     └── sites/             # 🌐 SITIOS: Aquí vive la lógica de cada página web.
         ├── base.py        # 📋 PLANTILLA: Define reglas comunes (login, buscar, notificar).
+        ├── andreani.py    # 👷 BOT 3: Implementación para Andreani.
         ├── bumeran.py     # 👷 BOT 1: Implementación para Bumeran.
         └── computrabajo.py# 👷 BOT 2: Implementación para Computrabajo.
 ```

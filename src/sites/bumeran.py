@@ -56,7 +56,7 @@ class BumeranBot(BaseBot):
         
 
         print(f"🔍 Iniciando escaneo inteligente (keywords: {SEARCH_KEYWORDS})")
-        self.notify(f"🤖 Iniciando búsqueda de Chamba")
+        self.notify(f"🤖 Buscando chamba por Bumeran!")
         
         target_base_url = "https://www.bumeran.com.ar/empleos-area-tecnologia-sistemas-y-telecomunicaciones-publicacion-menor-a-5-dias.html"
         MAX_PAGES = 5

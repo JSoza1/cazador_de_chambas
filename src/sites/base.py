@@ -67,21 +67,65 @@ class BaseBot(ABC):
             print(f"   ⚠️ No se pudo escribir en {value}")
             return False
 
-    def validate_job_title(self, title_text, search_keywords, negative_keywords):
+    def validate_job_title(self, job_title, search_keywords, negative_keywords):
         """
-        Valida si un título de empleo cumple con los requisitos de búsqueda.
-        Retorna la palabra clave coincidente o None si no sirve.
-        """
-        title_text = title_text.lower()
+        Analiza si un título de trabajo es relevante según las palabras clave configuradas.
         
-        # 1. Filtro Negativo
-        if any(bad in title_text for bad in negative_keywords):
-            return None
+        Args:
+            job_title (str): El título del aviso de empleo.
+            search_keywords (list): Lista de palabras que DEBEN estar (al menos una).
+            negative_keywords (list): Lista de palabras que NO deben estar.
+            
+        Returns:
+            str | None: Devuelve la palabra clave encontrada si hay match, o None si se descarta.
+        """
+        # Importamos 're' (Regular Expressions) para búsquedas avanzadas de texto
+        import re
+        
+        # 1. Normalización: Pasamos todo a minúsculas
+        normalized_title = job_title.lower()
+        
+        # --- FUNCIÓN INTERNA DE VALIDACIÓN ---
+        def contains_exact_word(search_term, content):
+            """
+            Verifica si 'search_term' aparece en 'content' como una palabra exacta.
+            Evita falsos positivos como detectar 'sr' dentro de 'ssr'.
+            """
+            
+            # Escapamos el término por si tiene caracteres especiales (C++, .Net)
+            escaped_term = re.escape(search_term)
 
-        # 2. Filtro Positivo
-        for k in search_keywords:
-            if k in title_text:
-                return k # Retornamos la keyword que hizo match
+            # --- ESTRATEGIA A: PALABRAS CON SÍMBOLOS (C#, .Net, C++) ---
+            # Las expresiones regulares estándar (\b) no manejan bien símbolos como '#' o '+'.
+            # Por ejemplo, \bC++\b no funciona porque + no es una letra/número.
+            # SOLUCIÓN: Usamos "Lookbehind" y "Lookahead" negativos (?<!\w) y (?!\w).
+            # Esto significa: "Busca la palabra DONDE lo que está antes NO sea una letra/número 
+            # y lo que está después TAMPOCO sea una letra/número".
+            if not search_term.isalnum(): 
+                pattern = r'(?<!\w)' + escaped_term + r'(?!\w)'
+                return re.search(pattern, content) is not None
+            
+            # --- ESTRATEGIA B: PALABRAS ALFANUMÉRICAS (Python, Java, Sr) ---
+            # Usamos \b (Word Boundary) ques es el estándar para límites de palabra.
+            # \b detecta cambios entre caracteres de palabra (a-z, 0-9) y no-palabra (espacio, punto).
+            try:
+                pattern = r'\b' + escaped_term + r'\b'
+                return re.search(pattern, content) is not None
+            except:
+                # Fallback de seguridad: Si falla el regex, búsqueda simple (menos precisa pero no rompe)
+                return search_term in content
+
+        # 2. APLICACIÓN DE FILTRO NEGATIVO
+        # Si encontramos CUALQUIER palabra prohibida como palabra exacta, descartamos el aviso.
+        for negative_word in negative_keywords:
+            if contains_exact_word(negative_word, normalized_title):
+                return None 
+
+        # 3. APLICACIÓN DE FILTRO POSITIVO
+        # Buscamos si ALGUNA de las palabras deseadas está presente.
+        for meaningful_keyword in search_keywords:
+            if contains_exact_word(meaningful_keyword, normalized_title):
+                return meaningful_keyword # ¡Éxito! Retornamos la palabra que hizo match
                 
         return None
 

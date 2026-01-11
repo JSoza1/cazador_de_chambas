@@ -83,7 +83,7 @@ class ComputrabajoBot(BaseBot):
         NEGATIVE_KEYWORDS = [k.lower() for k in RAW_NEG]
 
         print(f"🔍 COMPUTRABAJO: Iniciando búsqueda... {SEARCH_KEYWORDS}")
-        self.notify(f"🤖 Iniciando búsqueda en Computrabajo...")
+        self.notify(f"🤖 Buscando chamba por Computrabajo!")
 
         # Zonas de búsqueda definidas por el usuario
         ZONES_URLS = [

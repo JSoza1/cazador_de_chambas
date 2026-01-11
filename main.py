@@ -38,17 +38,23 @@ def main():
             try:
                 # --- FASE 2: EJECUCIÓN ---
                 
-                # --- BUMERAN (COMENTADO TEMPORALMENTE) ---
-                print("\n🚀 PROCESANDO: BUMERAN")
-                bot_bumeran = BumeranBot(driver)
-                bot_bumeran.login()
-                bot_bumeran.search()
+                # --- BUMERAN  ---
+                # print("\n🚀 PROCESANDO: BUMERAN")
+                # bot_bumeran = BumeranBot(driver)
+                # bot_bumeran.login()
+                # bot_bumeran.search()
                 
-                # --- COMPUTRABAJO ---
-                print("\n🚀 PROCESANDO: COMPUTRABAJO")
-                bot_computrabajo = ComputrabajoBot(driver)
-                bot_computrabajo.login()
-                bot_computrabajo.search()
+                # # --- COMPUTRABAJO ---
+                # print("\n🚀 PROCESANDO: COMPUTRABAJO")
+                # bot_computrabajo = ComputrabajoBot(driver)
+                # bot_computrabajo.login()
+                # bot_computrabajo.search()
+                
+                # --- ANDREANI ---
+                print("\n🚀 PROCESANDO: ANDREANI")
+                from src.sites.andreani import AndreaniBot
+                bot_andreani = AndreaniBot(driver)
+                bot_andreani.search()
                 
                 print("\n✅ Ciclo finalizado exitosamente.")
                 
