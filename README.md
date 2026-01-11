@@ -8,8 +8,9 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 
 ## 🚀 Características
 
-*   **Multi-Sitio & Extensible**: Compatible nativamente con Bumeran, Computrabajo, Andreani, EducaciónIT, BBVA, Vicente López, UTN Talentia y **EmpleosIT**. Gracias a su arquitectura modular, agregar nuevas bolsas de trabajo es una tarea sencilla.
+*   **Multi-Sitio & Extensible**: Compatible nativamente con Bumeran, Computrabajo, Andreani, EducaciónIT, BBVA, Vicente López, UTN Talentia y EmpleosIT. Gracias a su arquitectura modular, agregar nuevas bolsas de trabajo es una tarea sencilla.
 *   **Notificaciones en Tiempo Real**: Envía alertas a **Telegram** cada vez que encuentra una oferta interesante.
+*   **Control Interactivo**: Si respondes a una notificación en Telegram con **"ya lo vi"**, **"listo"**, **"este no"**, **"ya esta"** o **"paso"**, el bot dejará de mostrarte esa oferta por 15 días.
 *   **Modular y Escalable**: Estructura preparada para agregar más sitios (LinkedIn, etc.) sin reescribir el núcleo.
 *   **Filtrado Inteligente (Regex)**: Ignora ofertas no aplicables y duplicadas, distinguiendo palabras completas (ej: diferencia 'Sr' de 'Ssr').
 *   **Seguro**: Uso de variables de entorno para la protección de credenciales.
@@ -37,9 +38,13 @@ job-search/
 ├── main.py                # 🧠 CEREBRO: El punto de entrada. Coordina qué bots activar.
 ├── .env                   # 🔒 SECRETOS: Credenciales de sitios y de Telegram (privado).
 ├── .gitignore             # 🙈 SEGURIDAD: Define qué archivos ocultar a Git.
+├── seen_jobs.json         # 💾 MEMORIA: Base de datos local de ofertas ya vistas (auto-generado).
+├── last_update.json       # 📡 TELEGRAM: Control de mensajes leídos (auto-generado).
 ├── requirements.txt       # 📦 DEPENDENCIA: Lista de librerías necesarias.
 └── src/                   # ⚙️ CÓDIGO FUENTE
     ├── config.py          # ⚙️ CONFIGURACIÓN: Carga variables y keywords.
+    ├── history.py         # 🧠 MEMORIA: Lógica de persistencia de ofertas.
+    ├── listener.py        # 👂 ESCUCHA: Procesa respuestas del usuario en Telegram.
     ├── notifications.py   # 📢 ALERTAS: Sistema de envío de mensajes a Telegram.
     ├── driver.py          # 🚗 MOTOR: Maneja el navegador (Chrome) y modos Headless.
     └── sites/             # 🌐 SITIOS: Aquí vive la lógica de cada página web.

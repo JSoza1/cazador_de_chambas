@@ -1,6 +1,8 @@
-.env
 __pycache__/
 *.pyc
-*.log
-selenium_logs/
-.vscode/
+.env
+.DS_Store
+geckodriver.log
+chromedriver.log
+seen_jobs.json
+last_update.json

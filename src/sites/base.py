@@ -5,11 +5,13 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import random
 from src.notifications import send_telegram_message
+from src.history import history  # 📥 Importamos el gestor de historial
 
 class BaseBot(ABC):
     """
-    Clase Base Abstracta para bots de búsqueda.
-    
+    Clase madre para todos los bots de búsqueda de empleo.
+    Provee métodos comunes de Selenium y lógica básica.
+
     CONCEPTOS IMPORTANTES:
     - ABC (Abstract Base Class): Define un 'contrato'. Cualquier clase que herede de esta
       ESTÁ OBLIGADA a implementar los métodos marcados con @abstractmethod.
@@ -139,3 +141,20 @@ class BaseBot(ABC):
             send_telegram_message(message)
         except Exception as e:
             print(f"   ⚠️ Error enviando Telegram: {e}")
+
+    def check_and_track(self, url):
+        """
+        Verifica si la URL ya fue vista en los últimos 15 días.
+        Si es nueva, la registra.
+        
+        Returns:
+            bool: True si es NUEVA (o expirada), False si ya fue vista reciente.
+        """
+        if not url: return True
+        
+        if history.is_seen(url):
+            return False # Ya vista (el usuario dijo "ya lo vi"), ignorar.
+        else:
+            # NO agregamos automáticamente. 
+            # El usuario debe confirmar por Telegram para que se guarde.
+            return True

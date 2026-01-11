@@ -143,6 +143,10 @@ class ComputrabajoBot(BaseBot):
                         match = self.validate_job_title(title_text, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS)
                         
                         if match:
+                            # 🛑 VERIFICAR DUPLICADOS (HISTORIAL)
+                            if not self.check_and_track(link_url):
+                                continue
+
                             print(f"      ✨ MATCH: {title_text} ({match})")
                             self.notify(f"✨ <b>COMPUTRABAJO MATCH!</b>\n\n📌 {title_text}\n🔗 {link_url}")
                             

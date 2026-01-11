@@ -71,6 +71,10 @@ class EducacionITBot(BaseBot):
                         match_keyword = self.validate_job_title(title_text, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS)
 
                         if match_keyword:
+                            # 🛑 VERIFICAR DUPLICADOS (HISTORIAL)
+                            if not self.check_and_track(url_oferta):
+                                continue
+
                             print(f"         ✨ ¡MATCH! Coincide con '{match_keyword}'")
                             print(f"            🔗 URL: {url_oferta}")
                             

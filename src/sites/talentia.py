@@ -90,6 +90,14 @@ class TalentiaBot(BaseBot):
                     match_keyword = self.validate_job_title(title_text, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS)
 
                     if match_keyword:
+                        # 🛑 VERIFICAR DUPLICADOS (HISTORIAL)
+                        # Nota: Talentia no tiene URL única por oferta, usamos el Título como ID único.
+                        # Esto tiene el riesgo de ignorar si repostean el mismo título, pero es lo mejor posible.
+                        fake_id_url = f"talentia://{title_text.replace(' ', '_')}"
+                        
+                        if not self.check_and_track(fake_id_url):
+                            continue
+
                         found_any = True
                         # Evitamos duplicados en el mismo ciclo (aunque la paginación lo soluciona)
                         print(f"         ✨ ¡MATCH! Coincide con '{match_keyword}'")

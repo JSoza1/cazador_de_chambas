@@ -130,7 +130,8 @@ NEGATIVE_KEYWORDS = [
     "líder",
     "next.js",
     "next",
-    "business"
+    "business",
+    "webflow"
 ]
 
 # --- CONFIGURACIÓN TÉCNICA ---

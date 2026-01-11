@@ -112,6 +112,10 @@ class BumeranBot(BaseBot):
                     if not match_keyword:
                         continue 
                     
+                    # 🛑 VERIFICAR DUPLICADOS (HISTORIAL)
+                    if not self.check_and_track(url_oferta):
+                        continue
+
                     # ¡MATCH!
                     print(f"         ✨ ¡MATCH! Coincide con '{match_keyword}'")
                     print(f"            🔗 URL: {url_oferta}")

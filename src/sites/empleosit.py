@@ -82,10 +82,15 @@ class EmpleosITBot(BaseBot):
                         title_text = target_link.text.strip()
                         url_oferta = target_link.get_attribute("href")
 
-                        # Limpieza y Validación
+                        # Validación
                         match_keyword = self.validate_job_title(title_text, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS)
 
                         if match_keyword:
+                            # 🛑 VERIFICAR DUPLICADOS (HISTORIAL)
+                            if not self.check_and_track(url_oferta):
+                                # print(f"         zzz... ignorando duplicado: {title_text[:20]}...")
+                                continue
+                                
                             print(f"         ✨ ¡MATCH! Coincide con '{match_keyword}'")
                             print(f"            🔗 URL: {url_oferta}")
                             
