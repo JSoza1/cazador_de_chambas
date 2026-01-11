@@ -39,23 +39,53 @@ def main():
                 # --- FASE 2: EJECUCIÓN ---
                 
                 # --- BUMERAN  ---
-                # print("\n🚀 PROCESANDO: BUMERAN")
-                # bot_bumeran = BumeranBot(driver)
-                # bot_bumeran.login()
-                # bot_bumeran.search()
+                print("\n🚀 PROCESANDO: BUMERAN")
+                bot_bumeran = BumeranBot(driver)
+                bot_bumeran.login()
+                bot_bumeran.search()
                 
-                # # --- COMPUTRABAJO ---
-                # print("\n🚀 PROCESANDO: COMPUTRABAJO")
-                # bot_computrabajo = ComputrabajoBot(driver)
-                # bot_computrabajo.login()
-                # bot_computrabajo.search()
+                # --- COMPUTRABAJO ---
+                print("\n🚀 PROCESANDO: COMPUTRABAJO")
+                bot_computrabajo = ComputrabajoBot(driver)
+                bot_computrabajo.login()
+                bot_computrabajo.search()
                 
                 # --- ANDREANI ---
                 print("\n🚀 PROCESANDO: ANDREANI")
                 from src.sites.andreani import AndreaniBot
                 bot_andreani = AndreaniBot(driver)
                 bot_andreani.search()
-                
+
+                # --- EDUCACIÓN IT ---
+                print("\n🚀 PROCESANDO: EDUCACIÓN IT")
+                from src.sites.educacionit import EducacionITBot
+                bot_educacionit = EducacionITBot(driver)
+                bot_educacionit.search()
+
+                # --- BBVA ---
+                print("\n🚀 PROCESANDO: BBVA")
+                from src.sites.bbva import BBVABot
+                bot_bbva = BBVABot(driver)
+                bot_bbva.search()
+
+                # --- VICENTE LÓPEZ ---
+                print("\n🚀 PROCESANDO: VICENTE LÓPEZ")
+                from src.sites.vicentelopez import VicenteLopezBot
+                bot_vl = VicenteLopezBot(driver)
+                bot_vl.search()
+
+                # --- UTN TALENTIA ---
+                print("\n🚀 PROCESANDO: UTN TALENTIA")
+                from src.sites.talentia import TalentiaBot
+                bot_talentia = TalentiaBot(driver)
+                bot_talentia.search()
+
+                # --- EMPLEOS IT ---
+                print("\n🚀 PROCESANDO: EMPLEOS IT")
+                from src.sites.empleosit import EmpleosITBot
+                bot_eit = EmpleosITBot(driver)
+                bot_eit.search()
+
                 print("\n✅ Ciclo finalizado exitosamente.")
                 
             # EXPLICACIÓN DEL MANEJO DE ERRORES:

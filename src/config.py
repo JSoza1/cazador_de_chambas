@@ -57,7 +57,14 @@ SEARCH_KEYWORDS = [
     "desarrollador",
     "desarrollador web",
     "desarrollador frontend",
-    "desarrollador backend"
+    "desarrollador backend",
+    "developer",
+    "pasantía desarrollador",
+    "pasantía programador",
+    "pasantia programador",
+    "pasantia desarrollador",
+    "pasante desarrollador",
+    "pasante programador"
 ]
 
 # 2. Palabras Clave NEGATIVAS
@@ -104,7 +111,26 @@ NEGATIVE_KEYWORDS = [
     "azure",
     "google cloud",
     "google-cloud",
-    "java"
+    "java",
+    "data science",
+    "data",
+    "ux/ui",
+    "ux ui",
+    "ux",
+    "ui",
+    "pruebas",
+    "pl",
+    "sql",
+    "engineer",
+    "enginner",
+    "enginer",
+    "ingeniero",
+    "native",
+    "lider",
+    "líder",
+    "next.js",
+    "next",
+    "business"
 ]
 
 # --- CONFIGURACIÓN TÉCNICA ---

@@ -1,6 +1,6 @@
 # 🤖 Cazador De Chambas
 
-Este proyecto es un sistema automatizado diseñado para buscar y postular a empleos en diversas plataformas (**Bumeran**, **Computrabajo** y **Andreani**). Está construido en Python utilizando **Selenium** para la automatización del navegador.
+Este proyecto es un sistema automatizado diseñado para buscar y postular a empleos en diversas plataformas como **Bumeran** y **Computrabajo**, entre **otros sitios** especializados y bolsas de trabajo corporativas. Está construido en Python utilizando **Selenium** para la automatización del navegador.
 
 El objetivo de este código no es solo funcional, sino **educativo**. Está documentado extensamente para explicar cómo funciona cada parte.
 
@@ -8,7 +8,7 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 
 ## 🚀 Características
 
-*   **Multi-Sitio**: Compatible con Bumeran, Computrabajo y Andreani.
+*   **Multi-Sitio & Extensible**: Compatible nativamente con Bumeran, Computrabajo, Andreani, EducaciónIT, BBVA, Vicente López, UTN Talentia y **EmpleosIT**. Gracias a su arquitectura modular, agregar nuevas bolsas de trabajo es una tarea sencilla.
 *   **Notificaciones en Tiempo Real**: Envía alertas a **Telegram** cada vez que encuentra una oferta interesante.
 *   **Modular y Escalable**: Estructura preparada para agregar más sitios (LinkedIn, etc.) sin reescribir el núcleo.
 *   **Filtrado Inteligente (Regex)**: Ignora ofertas no aplicables y duplicadas, distinguiendo palabras completas (ej: diferencia 'Sr' de 'Ssr').
@@ -45,6 +45,11 @@ job-search/
     └── sites/             # 🌐 SITIOS: Aquí vive la lógica de cada página web.
         ├── base.py        # 📋 PLANTILLA: Define reglas comunes (login, buscar, notificar).
         ├── andreani.py    # 👷 BOT 3: Implementación para Andreani.
+        ├── bbva.py        # 👷 BOT 5: Implementación para BBVA.
+        ├── educacionit.py # 👷 BOT 4: Implementación para EducaciónIT.
+        ├── empleosit.py   # 👷 BOT 8: Implementación para EmpleosIT.
+        ├── talentia.py    # 👷 BOT 7: Implementación para UTN Talentia.
+        ├── vicentelopez.py# 👷 BOT 6: Implementación para Vicente López.
         ├── bumeran.py     # 👷 BOT 1: Implementación para Bumeran.
         └── computrabajo.py# 👷 BOT 2: Implementación para Computrabajo.
 ```

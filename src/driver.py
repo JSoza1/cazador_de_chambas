@@ -33,10 +33,13 @@ def get_driver():
     if not HEADLESS_MODE:
         chrome_options.add_argument("--start-maximized")
     
-    # SILENCIAR LOGS DE CHROME
-    # Ocultamiento de errores de "google_apis", "GCM", "Bluetooth", etc.
-    chrome_options.add_argument("--log-level=3") # Solo errores fatales
-    chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    # SILENCIAR LOGS DE CHROME Y OCULTAR "AUTOMATION"
+    chrome_options.add_argument("--log-level=3") 
+    
+    # 🕵️ MODO SIGILO MEJORADO (Anti-detección básica)
+    # Estas opciones ocultan la barra de "Chrome está siendo controlado por..."
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
+    chrome_options.add_experimental_option('useAutomationExtension', False)
     
     # 2. Detección de Sistema
     is_android = "ANDROID_ROOT" in os.environ

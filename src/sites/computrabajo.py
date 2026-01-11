@@ -101,7 +101,7 @@ class ComputrabajoBot(BaseBot):
                 # Si es p=1, la URL base sirve. Si es p>1, agregamos &p=X
                 current_url = base_url if page == 1 else f"{base_url}&p={page}"
                 
-                print(f"   📄 Procesando Página {page}...")
+                print(f"   📄 Buscando por PÁGINA {page}")
                 
                 self.driver.get(current_url)
                 self.random_sleep(3, 5)

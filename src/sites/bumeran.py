@@ -65,7 +65,7 @@ class BumeranBot(BaseBot):
             # Construimos URL
             current_url = target_base_url if page_num == 1 else f"{target_base_url}?page={page_num}"
             
-            print(f"\n   📄 --- PROCESANDO PÁGINA {page_num} ---")
+            print(f"\n   📄 Buscando por PÁGINA {page_num}")
             
             if current_url not in self.driver.current_url:
                 self.driver.get(current_url)
