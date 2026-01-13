@@ -77,11 +77,6 @@ class TalentiaBot(BaseBot):
                         # Fallback: El primer texto grande
                         title_text = card.text.split("\n")[0].strip()
 
-                    # Talentia no tiene URLs directas visibles fáciles (son JS actions).
-                    # La URL es la misma base, pero podemos inventar un link "fake" o dejarlo genérico
-                    # O tratar de buscar si hay un <a> wrapper.
-                    url_oferta = "https://utnba.talentia.com/portal/offers" 
-
                     # Limpieza
                     if not title_text or len(title_text) < 3:
                         continue
@@ -90,12 +85,63 @@ class TalentiaBot(BaseBot):
                     match_keyword = self.validate_job_title(title_text, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS)
 
                     if match_keyword:
-                        # 🛑 VERIFICAR DUPLICADOS (HISTORIAL)
-                        # Nota: Talentia no tiene URL única por oferta, usamos el Título como ID único.
-                        # Esto tiene el riesgo de ignorar si repostean el mismo título, pero es lo mejor posible.
-                        fake_id_url = f"talentia://{title_text.replace(' ', '_')}"
+                        # Extraer URL real abriendo el detalle
+                        # Por defecto la genérica
+                        url_oferta = "https://utnba.talentia.com/portal/offers"
                         
-                        if not self.check_and_track(fake_id_url):
+                        try:
+                            # 1. Click en tarjeta para abrir Side Panel
+                            print(f"         🔍 Extrayendo URL específica para '{title_text}'...")
+                            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", card)
+                            self.random_sleep(1, 2)
+                            card.click()
+                            self.random_sleep(2, 3)
+                            
+                            # 2. Buscar botón 'Ver pantalla completa'
+                            # Se abre un panel lateral. Buscamos el texto.
+                            btn_full = self.wait.until(EC.element_to_be_clickable(
+                                (By.XPATH, "//div[contains(text(), 'Ver pantalla completa')]")
+                            ))
+                            
+                            # 3. Abrir en nueva pestaña
+                            curr_handles = self.driver.window_handles
+                            btn_full.click()
+                            
+                            # Esperar nueva pestaña
+                            # Usamos un sleep simple o wait
+                            self.random_sleep(2, 3) 
+                            new_handles = self.driver.window_handles
+                            
+                            if len(new_handles) > len(curr_handles):
+                                new_tab = [h for h in new_handles if h not in curr_handles][0]
+                                self.driver.switch_to.window(new_tab)
+                                # Esperar a que cargue URL
+                                self.random_sleep(1, 2)
+                                url_oferta = self.driver.current_url
+                                
+                                # Cerrar y volver
+                                self.driver.close()
+                                self.driver.switch_to.window(curr_handles[0])
+                                print(f"         🔗 URL encontrada: {url_oferta}")
+                            else:
+                                print("         ⚠️ No se abrió nueva pestaña.")
+                            
+                        except Exception as e:
+                            print(f"         ⚠️ No se pudo extraer URL real: {e}")
+                            # Recuperar foco si algo falló
+                            try:
+                                self.driver.switch_to.window(self.driver.window_handles[0])
+                            except:
+                                pass
+
+                        # 🛑 VERIFICAR DUPLICADOS (HISTORIAL)
+                        # Usamos la URL real si es específica, sino el título
+                        if "detalle_oferta" in url_oferta:
+                             track_id = url_oferta
+                        else:
+                             track_id = f"talentia://{title_text.replace(' ', '_')}"
+
+                        if not self.check_and_track(track_id):
                             continue
 
                         found_any = True
