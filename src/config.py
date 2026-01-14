@@ -1,3 +1,13 @@
+"""
+MÓDULO DE CONFIGURACIÓN
+-----------------------
+Este archivo centraliza todas las variables configurables del proyecto.
+Permite ajustar el comportamiento del bot sin modificar el código fuente principal.
+
+- Carga credenciales desde .env
+- Define palabras clave de búsqueda
+- Controla tiempos de espera
+"""
 import os
 import sys
 from dotenv import load_dotenv
@@ -38,6 +48,33 @@ COMPUTRABAJO_PASSWORD = os.getenv("COMPUTRABAJO_PASSWORD")
 # Credenciales de Telegram
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+# Ruta de Perfil Personalizada (Opcional)
+# Permite especificar una ruta a un perfil de Chrome existente.
+CHROME_PROFILE_PATH = os.getenv("CHROME_PROFILE_PATH")
+
+# --- URLs DE BÚSQUEDA LINKEDIN ---
+# El bot recorrerá cada una de estas URLs secuencialmente.
+JOB_SEARCH_URLS = [
+    # === Filtros de ultima semana ===
+    # Desarrollador ARG
+    "https://www.linkedin.com/jobs/search/?currentJobId=4353192033&f_AL=true&f_TPR=r604800&geoId=100446943&keywords=Desarrollador&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
+
+    # Desarrollador España (Remoto)
+    "https://www.linkedin.com/jobs/search/?currentJobId=4352619718&f_AL=true&f_TPR=r604800&f_WT=2&geoId=105646813&keywords=Desarrollador&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
+
+    # Desarrollador Todo el mundo (Remoto)
+    "https://www.linkedin.com/jobs/search/?currentJobId=4361667042&f_AL=true&f_TPR=r604800&f_WT=2&geoId=92000000&keywords=Desarrollador&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true&sortBy=DD",
+
+    # Programador ARG
+    "https://www.linkedin.com/jobs/search/?currentJobId=4353004987&f_AL=true&f_TPR=r604800&geoId=100446943&keywords=Programador&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
+
+    # Programador España (Remoto)
+    "https://www.linkedin.com/jobs/search/?currentJobId=4353084758&f_AL=true&f_TPR=r604800&f_WT=2&geoId=105646813&keywords=Programador&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
+
+    # Programador Todo el mundo (Remoto)
+    "https://www.linkedin.com/jobs/search/?currentJobId=4359080675&f_AL=true&f_TPR=r604800&f_WT=2&geoId=92000000&keywords=Programador&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true&sortBy=DD"
+]
 
 # --- CONFIGURACIÓN DE BÚSQUEDA ---
 

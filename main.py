@@ -100,6 +100,14 @@ def main():
                 bot_eit.search()
                 check_telegram_replies() # 👂 Check Telegram
 
+                # --- LINKEDIN ---
+                print("\n🚀 PROCESANDO: LINKEDIN")
+                from src.sites.linkedin import LinkedInBot
+                bot_linkedin = LinkedInBot(driver)
+                # Login omitido: Se usa perfil persistente
+                bot_linkedin.search()
+                check_telegram_replies() # 👂 Check Telegram
+
                 print("\n✅ Ciclo finalizado exitosamente.")
                 
                 # Notificación de fin de ciclo
@@ -125,7 +133,7 @@ def main():
                 # --- FASE 3: LIMPIEZA ---
                 print("🔒 Cerrando navegador para liberar memoria.")
                 # Cierre del navegador para liberar memoria.
-                driver.quit()
+                driver.quit() 
             
             # Esperar para la siguiente ronda (con escucha activa)
             print(f"💤 Durmiendo {CHECK_INTERVAL_MINUTES} minutos hasta el próximo turno...")

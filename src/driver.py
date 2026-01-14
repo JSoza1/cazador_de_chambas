@@ -17,6 +17,28 @@ def get_driver():
     
     # 1. Configuración de Opciones del Navegador
     chrome_options = Options()
+
+    # --- CONFIGURACIÓN DE PERFIL PERSISTENTE ---
+    # Esto permite guardar cookies y sesión entre ejecuciones (Vital para LinkedIn)
+    from src.config import CHROME_PROFILE_PATH
+    from pathlib import Path
+    
+    if CHROME_PROFILE_PATH:
+        profile_dir = Path(CHROME_PROFILE_PATH)
+    else:
+        # Por defecto: Carpeta 'profile' en la raíz del proyecto
+        profile_dir = Path.cwd() / "profile"
+        
+    if not profile_dir.exists():
+        try:
+            profile_dir.mkdir(parents=True, exist_ok=True)
+            print(f"📁 Directorio de perfil creado: {profile_dir}")
+        except Exception as e:
+            print(f"⚠️ No se pudo crear directorio de perfil: {e}")
+            
+    print(f"👤 Usando perfil de Chrome: {profile_dir}")
+    chrome_options.add_argument(f"--user-data-dir={profile_dir}")
+    # -------------------------------------------
     
     # User-Agent: Simula un navegador real para evitar bloqueos básicos.
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
@@ -34,6 +56,7 @@ def get_driver():
     chrome_options.add_argument("--no-sandbox") 
     chrome_options.add_argument("--disable-dev-shm-usage") 
     
+    # Importante: Si usamos perfil, maximizar ayuda.
     if not HEADLESS_MODE:
         chrome_options.add_argument("--start-maximized")
     

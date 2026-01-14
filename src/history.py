@@ -9,7 +9,14 @@ DAYS_TO_REMEMBER = 15
 class JobHistory:
     """
     Gestiona la persistencia de ofertas vistas para evitar duplicados.
-    Evita notificar repetidamente la misma oferta al usuario.
+    
+    FUNCIONAMIENTO:
+    Mantiene un archivo JSON local ('seen_jobs.json') con parejas URL -> Fecha.
+    Cada vez que el usuario confirma una oferta ("ya lo vi"), se guarda aquí.
+    
+    LIMPIEZA AUTOMÁTICA:
+    Al iniciar, borra del archivo todas las ofertas que tengan más de X días.
+    Esto evita que el archivo crezca infinitamente y degrade el rendimiento.
     """
     
     def __init__(self):

@@ -8,10 +8,11 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 
 ## 🚀 Características
 
+*   **⚡ Nuevo: Soporte LinkedIn Avanzado**: Incluye un bot robusto para LinkedIn con manejo de perfiles persistentes (cookies) y scroll inteligente para evadir bloqueos.
 *   **Multi-Sitio & Extensible**: Compatible nativamente con Bumeran, Computrabajo, Andreani, EducaciónIT, BBVA, Vicente López, UTN Talentia y EmpleosIT. Gracias a su arquitectura modular, agregar nuevas bolsas de trabajo es una tarea sencilla.
 *   **Notificaciones en Tiempo Real**: Envía alertas a **Telegram** cada vez que encuentra una oferta interesante.
 *   **Control Interactivo**: Si respondes a una notificación en Telegram con **"ya lo vi"**, **"listo"**, **"este no"**, **"ya esta"** o **"paso"**, el bot dejará de mostrarte esa oferta por 15 días.
-*   **Modular y Escalable**: Estructura preparada para agregar más sitios (LinkedIn, etc.) sin reescribir el núcleo.
+*   **Modular y Escalable**: Estructura preparada para agregar más sitios (Zonajobs, etc.) sin reescribir el núcleo.
 *   **Filtrado Inteligente (Regex)**: Ignora ofertas no aplicables y duplicadas, distinguiendo palabras completas (ej: diferencia 'Sr' de 'Ssr').
 *   **Seguro**: Uso de variables de entorno para la protección de credenciales.
 *   **Portable**: Diseñado pensando en su futura migración a servidores o dispositivos Android (vía Termux).
@@ -34,13 +35,14 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 Entender la estructura es clave para modificar el código:
 
 ```text
-job-search/
+cazador_de_chambas/
 ├── main.py                # 🧠 CEREBRO: El punto de entrada. Coordina qué bots activar.
 ├── .env                   # 🔒 SECRETOS: Credenciales de sitios y de Telegram (privado).
 ├── .gitignore             # 🙈 SEGURIDAD: Define qué archivos ocultar a Git.
 ├── seen_jobs.json         # 💾 MEMORIA: Base de datos local de ofertas ya vistas (auto-generado).
 ├── last_update.json       # 📡 TELEGRAM: Control de mensajes leídos (auto-generado).
 ├── requirements.txt       # 📦 DEPENDENCIA: Lista de librerías necesarias.
+├── profile/               # 👤 COOKIES: Carpeta del perfil de Chrome (guarda sesión de LinkedIn).
 └── src/                   # ⚙️ CÓDIGO FUENTE
     ├── config.py          # ⚙️ CONFIGURACIÓN: Carga variables y keywords.
     ├── history.py         # 🧠 MEMORIA: Lógica de persistencia de ofertas.
@@ -49,14 +51,15 @@ job-search/
     ├── driver.py          # 🚗 MOTOR: Maneja el navegador (Chrome) y modos Headless.
     └── sites/             # 🌐 SITIOS: Aquí vive la lógica de cada página web.
         ├── base.py        # 📋 PLANTILLA: Define reglas comunes (login, buscar, notificar).
-        ├── andreani.py    # 👷 BOT 3: Implementación para Andreani.
-        ├── bbva.py        # 👷 BOT 5: Implementación para BBVA.
-        ├── educacionit.py # 👷 BOT 4: Implementación para EducaciónIT.
-        ├── empleosit.py   # 👷 BOT 8: Implementación para EmpleosIT.
-        ├── talentia.py    # 👷 BOT 7: Implementación para UTN Talentia.
-        ├── vicentelopez.py# 👷 BOT 6: Implementación para Vicente López.
-        ├── bumeran.py     # 👷 BOT 1: Implementación para Bumeran.
-        └── computrabajo.py# 👷 BOT 2: Implementación para Computrabajo.
+        ├── linkedin.py    # 🆕 LINKEDIN: Bot especializado con scroll y cookies persistentes.
+        ├── andreani.py    # 👷 BOT: Implementación para Andreani.
+        ├── bbva.py        # 👷 BOT: Implementación para BBVA.
+        ├── bumeran.py     # 👷 BOT: Implementación para Bumeran.
+        ├── computrabajo.py# 👷 BOT: Implementación para Computrabajo.
+        ├── educacionit.py # 👷 BOT: Implementación para EducaciónIT.
+        ├── empleosit.py   # 👷 BOT: Implementación para EmpleosIT.
+        ├── talentia.py    # 👷 BOT: Implementación para UTN Talentia.
+        └── vicentelopez.py# 👷 BOT: Implementación para Vicente López.
 ```
 
 ---
@@ -82,7 +85,37 @@ Para que el bot te avise al celular, necesitas dos datos sencillos:
 
 ---
 
-## 🛠️ Instalación en PC (Windows/Linux)
+## � Configuración LinkedIn (Primer Uso)
+
+LinkedIn requiere un tratamiento especial debido a sus fuertes medidas de seguridad (Anti-Bot). No usamos usuario/clave en el código, sino una **Sesión Persistente** (Cookies).
+
+> ⚠️ **ADVERTENCIA DE SEGURIDAD**: 
+> Se **recomienda encarecidamente** crear y utilizar una **cuenta secundaria de LinkedIn** exclusiva para este bot.
+> Esto es una medida preventiva para evitar cualquier posible inconveniente o suspensión de tu cuenta personal principal debido al uso de automatizaciones.
+
+**Pasos para activar LinkedIn:**
+
+1.  **Desactivar modo Headless**: En `src/config.py`, pon `HEADLESS_MODE = False`.
+2.  **Preparar el Código**:
+    *   Ve a `main.py`.
+    *   Busca la línea `driver.quit()` dentro del bloque `finally` (al final del bucle principal).
+    *   **COMENTA esa línea** (pon un `#` delante: `# driver.quit()`). Esto evitará que el navegador se cierre automáticamente.
+3.  **Ejecutar y Loguear**:
+    *   Corre el bot: `python main.py`.
+    *   Se abrirá Chrome. **Entra manualmente a LinkedIn e inicia sesión con tu usuario y contraseña.**
+    *   Navega un poco para comprobar que estás dentro.
+4.  **Cerrar y Guardar**:
+    *   Una vez logueado, cierra la ventana del navegador manualmente.
+    *   ¡Listo! Las cookies se guardaron en la carpeta `/profile`.
+5.  **Restaurar**:
+    *   Vuelve a `main.py` y **DESCOMENTA** `driver.quit()` para que el bot pueda liberar memoria en el futuro.
+    *   (Opcional) Vuelve a poner `HEADLESS_MODE = True` si quieres que corra oculto.
+
+A partir de ahora, el bot usará esas credenciales guardadas.
+
+---
+
+## �🛠️ Instalación en PC (Windows/Linux)
 
 ### 1. Prerrequisitos
 Se requiere tener instalado **Python** y **Google Chrome**.
