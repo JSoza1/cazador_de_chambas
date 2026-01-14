@@ -95,9 +95,9 @@ def main():
 
                 # --- EMPLEOS IT ---
                 print("\n🚀 PROCESANDO: EMPLEOS IT")
-                from src.sites.empleosit import EmpleosITBot
                 bot_eit = EmpleosITBot(driver)
                 bot_eit.search()
+                check_telegram_replies() # 👂 Check Telegram
 
                 print("\n✅ Ciclo finalizado exitosamente.")
                 
