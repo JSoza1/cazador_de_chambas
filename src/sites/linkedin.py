@@ -93,7 +93,8 @@ class LinkedInBot(BaseBot):
                                 # PC: Click normal
                                 next_btn.click()
                                 
-                            time.sleep(4)
+                            wait_time = 8 if is_android else 4
+                            time.sleep(wait_time)
                             
                             # 3. Scrollear un poco en Pág 2
                             body = self.driver.find_element(By.TAG_NAME, 'body')
@@ -113,7 +114,8 @@ class LinkedInBot(BaseBot):
                                 prev_btn.click()
                                 
                             print("      🔙 Volviendo a Pág 1...")
-                            time.sleep(4)
+                            wait_time = 8 if is_android else 4
+                            time.sleep(wait_time)
                             
                             fix_applied = True # ¡Listo! No lo volvemos a hacer en esta URL.
                         except Exception as e:
@@ -141,12 +143,17 @@ class LinkedInBot(BaseBot):
                         body = self.driver.find_element(By.TAG_NAME, 'body')
                         
                         # 8 pulsaciones de PAGE_DOWN para asegurar carga profunda
+                        # Ajustamos velocidad para Android
+                        is_android = "ANDROID_ROOT" in os.environ
+                        scroll_wait = 1.6 if is_android else 0.8
+                        final_wait = 5 if is_android else 2
+                        
                         for k in range(8): 
                             body.send_keys(Keys.PAGE_DOWN)
-                            time.sleep(0.8) # Espera para carga de contenido (lazy loading)
+                            time.sleep(scroll_wait) # Espera para carga de contenido (lazy loading)
                             
                         # Pequeña espera final
-                        time.sleep(2)
+                        time.sleep(final_wait)
                             
                     except Exception as e:
                         print(f"   ⚠️ Error en scroll de teclado: {e}")
