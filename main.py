@@ -46,67 +46,68 @@ def main():
                 # --- FASE 2: EJECUCIÓN ---
                 
                 # --- BUMERAN  ---
-                # print("\n🚀 PROCESANDO: BUMERAN")
-                # bot_bumeran = BumeranBot(driver)
-                # bot_bumeran.login()
-                # bot_bumeran.search()
-                # check_telegram_replies() # 👂 Check Telegram
+                print("\n🚀 PROCESANDO: BUMERAN")
+                bot_bumeran = BumeranBot(driver)
+                bot_bumeran.login()
+                bot_bumeran.search()
+                check_telegram_replies() # 👂 Check Telegram
                 
                 # # --- COMPUTRABAJO ---
-                # print("\n🚀 PROCESANDO: COMPUTRABAJO")
-                # bot_computrabajo = ComputrabajoBot(driver)
-                # bot_computrabajo.login()
-                # bot_computrabajo.search()
-                # check_telegram_replies() # 👂 Check Telegram
+                print("\n🚀 PROCESANDO: COMPUTRABAJO")
+                bot_computrabajo = ComputrabajoBot(driver)
+                bot_computrabajo.login()
+                bot_computrabajo.search()
+                check_telegram_replies() # 👂 Check Telegram
                 
                 # # --- ANDREANI ---
-                # print("\n🚀 PROCESANDO: ANDREANI")
-                # from src.sites.andreani import AndreaniBot
-                # bot_andreani = AndreaniBot(driver)
-                # bot_andreani.search()
-                # check_telegram_replies() # 👂 Check Telegram
+                print("\n🚀 PROCESANDO: ANDREANI")
+                from src.sites.andreani import AndreaniBot
+                bot_andreani = AndreaniBot(driver)
+                bot_andreani.search()
+                check_telegram_replies() # 👂 Check Telegram
 
                 # # --- EDUCACIÓN IT ---
-                # print("\n🚀 PROCESANDO: EDUCACIÓN IT")
-                # from src.sites.educacionit import EducacionITBot
-                # bot_educacionit = EducacionITBot(driver)
-                # bot_educacionit.search()
-                # check_telegram_replies() # 👂 Check Telegram
+                print("\n🚀 PROCESANDO: EDUCACIÓN IT")
+                from src.sites.educacionit import EducacionITBot
+                bot_educacionit = EducacionITBot(driver)
+                bot_educacionit.search()
+                check_telegram_replies() # 👂 Check Telegram
 
                 # # --- BBVA ---
-                # print("\n🚀 PROCESANDO: BBVA")
-                # from src.sites.bbva import BBVABot
-                # bot_bbva = BBVABot(driver)
-                # bot_bbva.search()
-                # check_telegram_replies() # 👂 Check Telegram
+                print("\n🚀 PROCESANDO: BBVA")
+                from src.sites.bbva import BBVABot
+                bot_bbva = BBVABot(driver)
+                bot_bbva.search()
+                check_telegram_replies() # 👂 Check Telegram
 
                 # # --- VICENTE LÓPEZ ---
-                # print("\n🚀 PROCESANDO: VICENTE LÓPEZ")
-                # from src.sites.vicentelopez import VicenteLopezBot
-                # bot_vl = VicenteLopezBot(driver)
-                # bot_vl.search()
-                # check_telegram_replies() # 👂 Check Telegram
+                print("\n🚀 PROCESANDO: VICENTE LÓPEZ")
+                from src.sites.vicentelopez import VicenteLopezBot
+                bot_vl = VicenteLopezBot(driver)
+                bot_vl.search()
+                check_telegram_replies() # 👂 Check Telegram
 
                 # # --- UTN TALENTIA ---
-                # print("\n🚀 PROCESANDO: UTN TALENTIA")
-                # from src.sites.talentia import TalentiaBot
-                # bot_talentia = TalentiaBot(driver)
-                # bot_talentia.search()
-                # check_telegram_replies() # 👂 Check Telegram
+                print("\n🚀 PROCESANDO: UTN TALENTIA")
+                from src.sites.talentia import TalentiaBot
+                bot_talentia = TalentiaBot(driver)
+                bot_talentia.search()
+                check_telegram_replies() # 👂 Check Telegram
 
                 # # --- EMPLEOS IT ---
-                # print("\n🚀 PROCESANDO: EMPLEOS IT")
-                # bot_eit = EmpleosITBot(driver)
-                # bot_eit.search()
-                # check_telegram_replies() # 👂 Check Telegram
+                print("\n🚀 PROCESANDO: EMPLEOS IT")
+                bot_eit = EmpleosITBot(driver)
+                bot_eit.search()
+                check_telegram_replies() # 👂 Check Telegram
 
                 # --- LINKEDIN ---
-                print("\n🚀 PROCESANDO: LINKEDIN")
-                from src.sites.linkedin import LinkedInBot
-                bot_linkedin = LinkedInBot(driver)
-                # Login omitido: Se usa perfil persistente
-                bot_linkedin.search()
-                check_telegram_replies() # 👂 Check Telegram
+                # ⚠️ COMENTADO PORQUE NO FUNCIONA EN TERMUX (SOLO EN PC)
+                # print("\n🚀 PROCESANDO: LINKEDIN")
+                # from src.sites.linkedin import LinkedInBot
+                # bot_linkedin = LinkedInBot(driver)
+                # # Login omitido: Se usa perfil persistente
+                # bot_linkedin.search()
+                # check_telegram_replies() # 👂 Check Telegram
 
                 print("\n✅ Ciclo finalizado exitosamente.")
                 
