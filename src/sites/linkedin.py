@@ -1,4 +1,5 @@
 from src.sites.base import BaseBot
+import os
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -71,7 +72,7 @@ class LinkedInBot(BaseBot):
                     # Esto "despierta" los scripts de carga dinámica (Lazy Loading) de LinkedIn.
                     # Solo lo hacemos una vez al principio (if not fix_applied).
                     # =========================================================================
-                    if page_num == 1 and not fix_applied:
+                    if page_num == 1 and not fix_applied and "ANDROID_ROOT" not in os.environ:
                         try:
                             print("      🔄 Maniobra Especial de Inicio: Ir a Pág 2 -> Scroll -> Volver...")
                             
