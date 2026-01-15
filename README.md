@@ -8,7 +8,7 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 
 ## 🚀 Características
 
-*   **⚡ Nuevo: Soporte LinkedIn Avanzado**: Incluye un bot robusto para LinkedIn con manejo de perfiles persistentes (cookies) y scroll inteligente para evadir bloqueos.
+*   **Soporte LinkedIn Avanzado**: Incluye un bot robusto para LinkedIn con manejo de perfiles persistentes (cookies) y scroll inteligente para evadir bloqueos.
 *   **Multi-Sitio & Extensible**: Compatible nativamente con Bumeran, Computrabajo, Andreani, EducaciónIT, BBVA, Vicente López, UTN Talentia y EmpleosIT. Gracias a su arquitectura modular, agregar nuevas bolsas de trabajo es una tarea sencilla.
 *   **Notificaciones en Tiempo Real**: Envía alertas a **Telegram** cada vez que encuentra una oferta interesante.
 *   **Control Interactivo**: Si respondes a una notificación en Telegram con **"ya lo vi"**, **"listo"**, **"este no"**, **"ya esta"** o **"paso"**, el bot dejará de mostrarte esa oferta por 15 días.
@@ -85,37 +85,7 @@ Para que el bot te avise al celular, necesitas dos datos sencillos:
 
 ---
 
-## � Configuración LinkedIn (Primer Uso)
-
-LinkedIn requiere un tratamiento especial debido a sus fuertes medidas de seguridad (Anti-Bot). No usamos usuario/clave en el código, sino una **Sesión Persistente** (Cookies).
-
-> ⚠️ **ADVERTENCIA DE SEGURIDAD**: 
-> Se **recomienda encarecidamente** crear y utilizar una **cuenta secundaria de LinkedIn** exclusiva para este bot.
-> Esto es una medida preventiva para evitar cualquier posible inconveniente o suspensión de tu cuenta personal principal debido al uso de automatizaciones.
-
-**Pasos para activar LinkedIn:**
-
-1.  **Desactivar modo Headless**: En `src/config.py`, pon `HEADLESS_MODE = False`.
-2.  **Preparar el Código**:
-    *   Ve a `main.py`.
-    *   Busca la línea `driver.quit()` dentro del bloque `finally` (al final del bucle principal).
-    *   **COMENTA esa línea** (pon un `#` delante: `# driver.quit()`). Esto evitará que el navegador se cierre automáticamente.
-3.  **Ejecutar y Loguear**:
-    *   Corre el bot: `python main.py`.
-    *   Se abrirá Chrome. **Entra manualmente a LinkedIn e inicia sesión con tu usuario y contraseña.**
-    *   Navega un poco para comprobar que estás dentro.
-4.  **Cerrar y Guardar**:
-    *   Una vez logueado, cierra la ventana del navegador manualmente.
-    *   ¡Listo! Las cookies se guardaron en la carpeta `/profile`.
-5.  **Restaurar**:
-    *   Vuelve a `main.py` y **DESCOMENTA** `driver.quit()` para que el bot pueda liberar memoria en el futuro.
-    *   (Opcional) Vuelve a poner `HEADLESS_MODE = True` si quieres que corra oculto.
-
-A partir de ahora, el bot usará esas credenciales guardadas.
-
----
-
-## �🛠️ Instalación en PC (Windows/Linux)
+## 🛠️ Instalación en PC (Windows/Linux)
 
 ### 1. Prerrequisitos
 Se requiere tener instalado **Python** y **Google Chrome**.
@@ -123,7 +93,7 @@ Se requiere tener instalado **Python** y **Google Chrome**.
 ### 2. Pasos
 1.  Clonar el repositorio.
 2.  Instalar dependencias: `pip install -r requirements.txt`
-3.  Crear `.env` basándose en `.env.example`.
+3.  Crear `.env` basándose en `.env.example` (Solo requiere configurar Telegram).
 
 ---
 

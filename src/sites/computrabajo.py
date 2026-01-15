@@ -1,5 +1,4 @@
 from src.sites.base import BaseBot
-from src.config import COMPUTRABAJO_EMAIL, COMPUTRABAJO_PASSWORD
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,69 +8,6 @@ class ComputrabajoBot(BaseBot):
     """
     Bot específico para Computrabajo (Argentina).
     """
-
-    def login(self):
-        print("🔑 COMPUTRABAJO: Iniciando proceso de login...")
-        
-        # 1. Vamos a la home
-        self.driver.get("https://ar.computrabajo.com/")
-        self.random_sleep(2, 4)
-
-        # 2. Verificamos si ya estamos logueados (buscando menú de usuario o algo similar)
-        if "candidato.ar.computrabajo.com" in self.driver.current_url:
-             print(f"   ✅ Sesión activa detectada.")
-             return
-
-        # 3. Buscamos el botón "Ingresar"
-        print("   -> Buscando botón de ingreso...")
-        try:
-            # PASO 1: Abrir el menú lateral (span con data-login-button-desktop)
-            menu_btn = self.driver.find_element(By.CSS_SELECTOR, "[data-login-button-desktop]")
-            menu_btn.click()
-            self.random_sleep(1, 2)
-            
-            # PASO 2: Clic en "Ingresar" del menú desplegado (span con data-access-menu)
-            login_btn = self.driver.find_element(By.CSS_SELECTOR, "[data-access-menu]")
-            login_btn.click()
-            
-        except Exception as e:
-            print(f"   ⚠️ Falló el click en menú (Error: {e}). Intentando URL directa...")
-            self.driver.get("https://candidato.ar.computrabajo.com/login/")
-        
-        self.random_sleep(3, 5)
-
-        # 4. Llenar formulario (Login en dos pasos)
-        print("   -> Llenando credenciales (Paso 1: Email)...")
-        
-        # --- PASO A: Email ---
-        if not self.type_text(By.ID, "Email", COMPUTRABAJO_EMAIL):
-            print("   ❌ No pude ingresar el Email.")
-            return
-
-        # Clic en "Continuar" para ir al password
-        self.random_sleep(1, 2)
-        print("   -> Click 'Continuar'...")
-        if not self.safe_click(By.ID, "continueWithMailButton"):
-             print("   ❌ No encontré botón 'Continuar'.")
-             return
-             
-        self.random_sleep(2, 4) # Esperar transición
-
-        # --- PASO B: Password ---
-        print("   -> Llenando credenciales (Paso 2: Password)...")
-        # El campo password (id="password") aparece después
-        if not self.type_text(By.ID, "password", COMPUTRABAJO_PASSWORD):
-             print("   ❌ No pude ingresar el Password.")
-             return
-
-        # Botón Iniciar Sesión (id="btnSubmitPass")
-        self.random_sleep(1, 2)
-        print("   -> Click 'Iniciar Sesión'...")
-        self.safe_click(By.ID, "btnSubmitPass")
-
-        self.random_sleep(5, 8)
-        print("   ✅ Login finalizado (o intento completado).")
-
 
     def search(self, _=None):
         """
@@ -91,7 +27,7 @@ class ComputrabajoBot(BaseBot):
             "https://ar.computrabajo.com/empleos-de-informatica-y-telecom-en-buenos-aires-gba?pubdate=7&by=publicationtime"
         ]
         
-        MAX_PAGES = 5
+        MAX_PAGES = 8
 
         for zone_index, base_url in enumerate(ZONES_URLS):
             print(f"\n🌍 --- ZONA {zone_index + 1}: {base_url} ---")
@@ -156,7 +92,7 @@ class ComputrabajoBot(BaseBot):
                             self.driver.switch_to.window(self.driver.window_handles[-1])
                             
                             # Intentar postular
-                            self.apply_to_current_job() 
+                            # self.apply_to_current_job() # Deshabilitado en modo exploración 
                             
                             self.driver.close()
                             self.driver.switch_to.window(original_window)

@@ -23,10 +23,7 @@ class BaseBot(ABC):
         self.driver = driver
         self.wait = WebDriverWait(driver, 10) # Espera máxima de 10 segundos para encontrar elementos
 
-    @abstractmethod
-    def login(self):
-        """Implementación de la lógica de inicio de sesión."""
-        pass
+
 
     @abstractmethod
     def search(self, keyword):

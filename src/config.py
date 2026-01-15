@@ -37,13 +37,7 @@ def get_env_variable(var_name, default=None, required=True):
         
     return value
 
-# --- Credenciales Bumeran ---
-BUMERAN_EMAIL = os.getenv("BUMERAN_EMAIL")
-BUMERAN_PASSWORD = os.getenv("BUMERAN_PASSWORD")
 
-# --- Credenciales Computrabajo ---
-COMPUTRABAJO_EMAIL = os.getenv("COMPUTRABAJO_EMAIL")
-COMPUTRABAJO_PASSWORD = os.getenv("COMPUTRABAJO_PASSWORD")
 
 # Credenciales de Telegram
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")

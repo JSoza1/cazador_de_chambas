@@ -1,7 +1,7 @@
 from src.sites.base import BaseBot
-from src.config import BUMERAN_EMAIL, BUMERAN_PASSWORD
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 class BumeranBot(BaseBot):
@@ -9,39 +9,6 @@ class BumeranBot(BaseBot):
     Bot específico para Bumeran.
     Hereda de BaseBot, acceso a atributos self.driver, self.wait, etc.
     """
-    
-    def login(self):
-        print("🔑 Navegando al login...")
-        self.driver.get("https://www.bumeran.com.ar/login")
-        self.random_sleep(2, 4)
-
-        # DETECCIÓN DE SESIÓN:
-        # Verificación de redirección automática tras acceso a /login.
-        if "login" not in self.driver.current_url and "ingresar" not in self.driver.current_url:
-            print(f"   ✅ Sesión activa detectada (URL actual: {self.driver.current_url})")
-            return
-
-        print("   -> Sesión inactiva. Iniciando autenticación...")
-
-        # 1. Ingresar Email (Selector corregido: id="email")
-        if self.type_text(By.ID, "email", BUMERAN_EMAIL):
-            print("   -> Email ingresado")
-        else:
-            print("   ⚠️ No encontré el campo de email (id='email').")
-            return 
-            
-        # 2. Ingresar Password (id="password")
-        if self.type_text(By.ID, "password", BUMERAN_PASSWORD):
-            print("   -> Password ingresado")
-        
-        # 3. Clic en Botón Ingresar (id="ingresar")
-        # Esperamos un poco para asegurarnos de que el botón se habilite (deje de estar disabled)
-        self.random_sleep(1, 2)
-        print("   -> Clickeando botón Ingresar...")
-        self.safe_click(By.ID, "ingresar")
-        
-        self.random_sleep(5, 8) # Esperamos a que cargue la página inicial
-        print("   ✅ Proceso de login finalizado.")
 
     def search(self, _=None):
         """
@@ -59,7 +26,7 @@ class BumeranBot(BaseBot):
         self.notify(f"🤖 Buscando chamba por Bumeran!")
         
         target_base_url = "https://www.bumeran.com.ar/empleos-area-tecnologia-sistemas-y-telecomunicaciones-publicacion-menor-a-5-dias.html"
-        MAX_PAGES = 5
+        MAX_PAGES = 10
         
         for page_num in range(1, MAX_PAGES + 1):
             # Construimos URL
@@ -74,7 +41,7 @@ class BumeranBot(BaseBot):
             # --- Detección de Tarjetas ---
             # Espera relajada. Se intenta buscar elementos incluso si falla la espera explícita.
             try:
-                self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/empleos/') and contains(@href, '.html')]")))
+                self.wait.until(EC.presence_of_all_elements_located((By.XPATH, "//a[contains(@href, '/empleos/') and contains(@href, '.html')]")))
             except:
                 pass 
             
@@ -126,7 +93,7 @@ class BumeranBot(BaseBot):
                     self.random_sleep(2, 3)
                     self.driver.switch_to.window(self.driver.window_handles[-1])
                     
-                    self.apply_to_current_job()
+                    # self.apply_to_current_job()
                     
                     # Cerrar y volver
                     self.driver.close()

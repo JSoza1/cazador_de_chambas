@@ -48,14 +48,12 @@ def main():
                 # --- BUMERAN  ---
                 print("\n🚀 PROCESANDO: BUMERAN")
                 bot_bumeran = BumeranBot(driver)
-                bot_bumeran.login()
                 bot_bumeran.search()
                 check_telegram_replies() # 👂 Check Telegram
                 
                 # # --- COMPUTRABAJO ---
                 print("\n🚀 PROCESANDO: COMPUTRABAJO")
                 bot_computrabajo = ComputrabajoBot(driver)
-                bot_computrabajo.login()
                 bot_computrabajo.search()
                 check_telegram_replies() # 👂 Check Telegram
                 
