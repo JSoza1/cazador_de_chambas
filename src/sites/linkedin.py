@@ -118,15 +118,7 @@ class LinkedInBot(BaseBot):
                             fix_applied = True # ¡Listo! No lo volvemos a hacer en esta URL.
                         except Exception as e:
                             print(f"      ⚠️ No se pudo realizar la maniobra 1->2->1: {e}")
-                            
-                            # DEBUG ANDROID: FOTO DEL CRIMEN
-                            if "ANDROID_ROOT" in os.environ:
-                                try:
-                                    self.driver.save_screenshot("linkedin_debug_android.png")
-                                    print("      📸 Screenshot guardado: linkedin_debug_android.png")
-                                except:
-                                    pass
-                                    
+
                             # Si falla, marcamos como hecho para no quedarnos en un bucle infinito
                             fix_applied = True
 
