@@ -72,17 +72,27 @@ class LinkedInBot(BaseBot):
                     # Esto "despierta" los scripts de carga dinámica (Lazy Loading) de LinkedIn.
                     # Solo lo hacemos una vez al principio (if not fix_applied).
                     # =========================================================================
-                    if page_num == 1 and not fix_applied and "ANDROID_ROOT" not in os.environ:
+                    if page_num == 1 and not fix_applied:
                         try:
-                            print("      🔄 Maniobra Especial de Inicio: Ir a Pág 2 -> Scroll -> Volver...")
+                            # Detectar entorno
+                            is_android = "ANDROID_ROOT" in os.environ
+                            maniobra_msg = "🔄 Maniobra Especial (PC)" if not is_android else "🔄 Maniobra Especial (Android/JS)"
+                            print(f"      {maniobra_msg}: Ir a Pág 2 -> Scroll -> Volver...")
                             
-                            # 1. Bajar al fondo para encontrar botón 'Siguiente'
+                            # 1. Bajar al fondo
                             self.driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
                             time.sleep(2)
                             
                             # 2. Click 'Siguiente'
                             next_btn = self.driver.find_element(By.CSS_SELECTOR, "button.jobs-search-pagination__button--next")
-                            next_btn.click()
+                            
+                            if is_android:
+                                # ANDROID: Click nuclear con JS (ignora superposiciones)
+                                self.driver.execute_script("arguments[0].click();", next_btn)
+                            else:
+                                # PC: Click normal
+                                next_btn.click()
+                                
                             time.sleep(4)
                             
                             # 3. Scrollear un poco en Pág 2
@@ -94,8 +104,15 @@ class LinkedInBot(BaseBot):
                             
                             # 4. Click 'Anterior' para volver a Pág 1
                             prev_btn = self.driver.find_element(By.CSS_SELECTOR, "button.jobs-search-pagination__button--previous")
-                            prev_btn.click()
-                            print("      🔙 Volviendo a Pág 1 con botón...")
+                            
+                            if is_android:
+                                # ANDROID: Click nuclear con JS
+                                self.driver.execute_script("arguments[0].click();", prev_btn)
+                            else:
+                                # PC: Click normal
+                                prev_btn.click()
+                                
+                            print("      🔙 Volviendo a Pág 1...")
                             time.sleep(4)
                             
                             fix_applied = True # ¡Listo! No lo volvemos a hacer en esta URL.
