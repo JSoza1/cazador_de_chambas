@@ -70,100 +70,19 @@ JOB_SEARCH_URLS = [
     "https://www.linkedin.com/jobs/search/?currentJobId=4359080675&f_AL=true&f_TPR=r604800&f_WT=2&geoId=92000000&keywords=Programador&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true&sortBy=DD"
 ]
 
+from src.keywords_manager import get_positive_keywords, get_negative_keywords
+
 # --- CONFIGURACIÓN DE BÚSQUEDA ---
 
 # 1. Palabras Clave POSITIVAS
 # El sistema buscará estas palabras en los TÍTULOS de las ofertas.
-SEARCH_KEYWORDS = [
-    "desarrollo web", 
-    "frontend", 
-    "programador web", 
-    "python",
-    "programador",
-    "react",
-    "javascript",  
-    "maquetador web",
-    "web developer",
-    "front-end",
-    "desarrollador",
-    "desarrollador web",
-    "desarrollador frontend",
-    "desarrollador backend",
-    "developer",
-    "pasantía desarrollador",
-    "pasantía programador",
-    "pasantia programador",
-    "pasantia desarrollador",
-    "pasante desarrollador",
-    "pasante programador"
-]
+# Ahora se cargan dinámicamente desde keywords.json
+SEARCH_KEYWORDS = get_positive_keywords()
 
 # 2. Palabras Clave NEGATIVAS
 # Si el título contiene alguna de estas palabras, la oferta se DESCARTA automáticamente.
-# Utilidad para filtrar puestos por seniority no deseado (ej: Senior vs Junior).
-NEGATIVE_KEYWORDS = [
-    "senior", 
-    "sr", 
-    "ssr", 
-    "lead", 
-    "arquitecto", 
-    "+3 años", 
-    "+4 años", 
-    "+5 años",
-    "ingles avanzado", 
-    "bilingue",
-    ".net",
-    "net",
-    "cobol",
-    "angular",
-    "vue",
-    "analista de datos",
-    "power bi",
-    "qa",
-    "c#",
-    "c++",
-    "arduino",
-    "PLC",
-    "soporte it",
-    "wordpress",
-    "devops",
-    "sysadmin",
-    "php",
-    "laravel",
-    "django",
-    "fullstack",
-    "full stack",
-    "full-stack",
-    "sap",
-    "sap abap",
-    "abap",
-    "cloud",
-    "aws",
-    "azure",
-    "google cloud",
-    "google-cloud",
-    "java",
-    "data science",
-    "data",
-    "ux/ui",
-    "ux ui",
-    "ux",
-    "ui",
-    "pruebas",
-    "pl",
-    "sql",
-    "engineer",
-    "enginner",
-    "enginer",
-    "ingeniero",
-    "native",
-    "lider",
-    "líder",
-    "next.js",
-    "next",
-    "business",
-    "webflow"
-]
+# Ahora se cargan dinámicamente desde keywords.json
+NEGATIVE_KEYWORDS = get_negative_keywords()
 
 # --- CONFIGURACIÓN TÉCNICA ---
 

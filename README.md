@@ -40,6 +40,7 @@ cazador_de_chambas/
 ├── .env                   # 🔒 SECRETOS: Credenciales de sitios y de Telegram (privado).
 ├── .gitignore             # 🙈 SEGURIDAD: Define qué archivos ocultar a Git.
 ├── seen_jobs.json         # 💾 MEMORIA: Base de datos local de ofertas ya vistas (auto-generado).
+├── keywords.json          # 💾 MEMORIA: Base de datos de palabras clave (auto-generado).
 ├── last_update.json       # 📡 TELEGRAM: Control de mensajes leídos (auto-generado).
 ├── requirements.txt       # 📦 DEPENDENCIA: Lista de librerías necesarias.
 ├── profile/               # 👤 COOKIES: Carpeta del perfil de Chrome (guarda sesión de LinkedIn).
@@ -47,6 +48,7 @@ cazador_de_chambas/
     ├── config.py          # ⚙️ CONFIGURACIÓN: Carga variables y keywords.
     ├── history.py         # 🧠 MEMORIA: Lógica de persistencia de ofertas.
     ├── listener.py        # 👂 ESCUCHA: Procesa respuestas del usuario en Telegram.
+    ├── keywords_manager.py # 🧠 MEMORIA: Gestión de palabras clave JSON.
     ├── notifications.py   # 📢 ALERTAS: Sistema de envío de mensajes a Telegram.
     ├── driver.py          # 🚗 MOTOR: Maneja el navegador (Chrome) y modos Headless.
     └── sites/             # 🌐 SITIOS: Aquí vive la lógica de cada página web.
@@ -61,6 +63,23 @@ cazador_de_chambas/
         ├── talentia.py    # 👷 BOT: Implementación para UTN Talentia.
         └── vicentelopez.py# 👷 BOT: Implementación para Vicente López.
 ```
+
+---
+
+## 🎮 Comandos de Telegram
+
+Una vez configurado el bot, puedes controlarlo dinámicamente desde el chat sin reiniciar:
+
+| Acción | Comando Principal | Alias (Más cortos) | Ejemplo |
+|:---|:---|:---|:---|
+| **Agregar Negativa** 🚫 | `/addneg <palabra>` | `/menos`, `/an` | `/menos wordpress` |
+| **Eliminar Negativa** 🗑️ | `/delneg <palabra>` | `/sacarmenos`, `/dn` | `/dn php` |
+| **Agregar Positiva** ✅ | `/addpos <palabra>` | `/mas`, `/ap` | `/mas rust` |
+| **Eliminar Positiva** 🗑️ | `/delpos <palabra>` | `/sacarmas`, `/dp` | `/dp react` |
+| **Ver Negativas** 📜 | `/listneg` | `/vermenos`, `/ln` | `/ln` |
+| **Ver Positivas** 📜 | `/listpos` | `/vermas`, `/lp` | `/lp` |
+| **Ayuda / Comandos** ℹ️ | `/comandos` | `/help`, `/ayuda` | `/ayuda` |
+| **Archivar Oferta** 🗃️ | `ya lo vi` | `listo`, `paso`, `visto` | *(Responder al mensaje del bot)* |
 
 ---
 
