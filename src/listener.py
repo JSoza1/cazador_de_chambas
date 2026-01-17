@@ -15,13 +15,15 @@ from src.keywords_manager import (
     remove_positive_keyword
 )
 
-# Archivo de control para evitar procesar mensajes antiguos (evita bucles infinitos)
+# Archivo de control para persistencia del offset de actualizaciones (evita reprocesamiento)
 UPDATES_FILE = "last_update.json"
 
 def get_last_update_id():
     """
-    Recupera el ID (identificador único) de la última actualización de Telegram que procesamos.
-    Esto permite que si el bot se reinicia, no vuelva a leer mensajes viejos.
+    Recupera el último 'update_id' procesado desde el almacenamiento local.
+    
+    Returns:
+        int: El último ID de actualización procesado, o 0 si no existe el archivo.
     """
     if not os.path.exists(UPDATES_FILE):
         return 0
@@ -34,16 +36,22 @@ def get_last_update_id():
 
 def save_last_update_id(update_id):
     """
-    Guarda el ID de la última actualización en el disco duro.
-    Es como un 'punto de guardado' del juego.
+    Persiste el 'update_id' más reciente en un archivo JSON.
+    Esto actualiza el offset para las futuras peticiones de polling.
+    
+    Args:
+        update_id (int): El ID de la última actualización procesada exitosamente.
     """
     with open(UPDATES_FILE, "w") as file_handler:
         json.dump({"last_id": update_id}, file_handler)
 
 def send_msg(chat_id, text_message):
     """
-    Función auxiliar para enviar mensajes simples a Telegram.
-    Se usa para responderle al usuario (ej: '✅ Palabra agregada').
+    Envía un mensaje de texto a un chat específico utilizando la API de Telegram.
+    
+    Args:
+        chat_id (str|int): Identificador del chat de destino.
+        text_message (str): Contenido del mensaje a enviar.
     """
     try:
         # Usamos POST para evitar problemas con la longitud de la URL y caracteres especiales
@@ -59,13 +67,15 @@ def send_msg(chat_id, text_message):
 
 def check_telegram_replies():
     """
-    Esta es la función principal que 'escucha' a Telegram.
-    Usa una técnica llamada 'Polling' para preguntar si hay mensajes nuevos.
+    Función principal de 'Polling' para la API de Telegram.
     
-    Funcionalidades:
-    1. Detecta comandos de gestión (/addneg, /listpos, etc).
-    2. Detecta comandos de acción ('ya lo vi', 'listo').
-    3. Actualiza el historial de ofertas vistas si corresponde.
+    Recupera actualizaciones pendientes, procesa comandos de gestión de keywords,
+    y maneja interacciones de archivado de ofertas ('reply' a mensajes).
+    
+    Flujo:
+    1. Obtiene el último offset procesado.
+    2. Realiza un request GET a /getUpdates con el offset incrementado.
+    3. Itera sobre los mensajes recibidos y despacha la lógica según el contenido.
     """
     
     if not TELEGRAM_BOT_TOKEN:
@@ -73,8 +83,8 @@ def check_telegram_replies():
 
     last_id = get_last_update_id()
     
-    # Construimos la URL para pedir actualizaciones a Telegram.
-    # offset = last_id + 1 le dice a Telegram: "Dame solo los mensajes NUEVOS que llegaron después de este ID".
+    # Construcción de la URL para Long Polling.
+    # offset = last_id + 1 confirma las actualizaciones previas y solicita solo las nuevas.
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates?offset={last_id + 1}"
     
     try:
@@ -242,6 +252,11 @@ def check_telegram_replies():
                         time.sleep(1)
                     except: 
                         pass
+                    
+                    # CRÍTICO: Persistencia del estado antes de finalizar el proceso.
+                    # Se guarda el current_update_id para evitar procesar el comando 'stop' nuevamente al reiniciar.
+                    save_last_update_id(update_id)
+                    
                     sys.exit(0)
                 
                 # Si procesamos un comando "/", pasamos al siguiente mensaje (continue)
@@ -295,11 +310,11 @@ def check_telegram_replies():
                     
                     # Verificamos si ya estaba en el historial para dar feedback adecuado
                     if history.is_seen(found_url):
-                         send_msg(chat_id, "Ya estaba marcada, tranqui. 👍")
+                         send_msg(chat_id, "ℹ️ La URL ya se encuentra en el historial.")
                     else:
-                        # La magia ocurre aquí: se agrega a seen_jobs.json
+                        # Persistencia: se agrega la URL al archivo seen_jobs.json
                         history.add_job(found_url)
-                        send_msg(chat_id, "✅ Listo, oferta archivada.")
+                        send_msg(chat_id, "✅ Oferta archivada correctamente.")
                 else:
                     print("   ⚠️ Comando recibido, pero no detecté ninguna URL en el mensaje original.")
 
