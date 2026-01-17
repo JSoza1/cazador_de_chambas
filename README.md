@@ -80,6 +80,7 @@ Una vez configurado el bot, puedes controlarlo dinámicamente desde el chat sin 
 | **Ver Positivas** 📜 | `/listpos` | `/vermas`, `/lp` | `/lp` |
 | **Ayuda / Comandos** ℹ️ | `/comandos` | `/help`, `/ayuda` | `/ayuda` |
 | **Archivar Oferta** 🗃️ | `ya lo vi` | `listo`, `paso`, `visto` | *(Responder al mensaje del bot)* |
+| **Apagar Bot** 🛑 | `/stop` | `/shutdown`, `/apagar`, `/exit` | `/stop` |
 
 ---
 

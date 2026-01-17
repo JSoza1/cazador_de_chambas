@@ -2,6 +2,7 @@
 import requests
 import re
 import os
+import sys
 import json
 from src.config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from src.history import history
@@ -229,6 +230,19 @@ def check_telegram_replies():
                         "Responder `ya lo vi`, `listo` o `paso` a una oferta para archivarla."
                     )
                     send_msg(chat_id, help_text)
+
+                # === BLOQUE: APAGADO REMOTO ===
+                elif command_name in ["/stop", "/shutdown", "/apagar", "/exit", "/salir"]:
+                    print(f"   🛑 [CMD] Usuario ordenó APAGADO REMOTO.")
+                    send_msg(chat_id, "👋 Entendido. Apagando sistemas... ¡Nos vemos!")
+                    
+                    # Esperamos un segundo para que el mensaje salga
+                    try:
+                        import time
+                        time.sleep(1)
+                    except: 
+                        pass
+                    sys.exit(0)
                 
                 # Si procesamos un comando "/", pasamos al siguiente mensaje (continue)
                 continue
