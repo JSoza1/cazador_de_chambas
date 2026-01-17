@@ -3,7 +3,7 @@ import requests
 import re
 import os
 import json
-from src.config import TELEGRAM_BOT_TOKEN
+from src.config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from src.history import history
 from src.keywords_manager import (
     add_negative_keyword, 
@@ -103,6 +103,12 @@ def check_telegram_replies():
             # Extraemos el mensaje y el chat_id
             message_data = update.get("message", {})
             chat_id = message_data.get("chat", {}).get("id")
+            
+            # --- SEGURIDAD: VERIFICAR AUTORIZACIÓN ---
+            # Si el mensaje no viene del dueño, lo ignoramos.
+            if str(chat_id) != str(TELEGRAM_CHAT_ID):
+                print(f"   ⚠️ Acceso no autorizado detectado desde ID: {chat_id}")
+                continue
             
             # Obtenemos el texto del mensaje limpio de espacios
             message_text = message_data.get("text", "").strip() 
