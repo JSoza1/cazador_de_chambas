@@ -93,7 +93,18 @@ class EmpleosITBot(BaseBot):
                                 
                             print(f"         ✨ ¡MATCH! Coincide con '{match_keyword}'")
                             print(f"            🔗 URL: {url_oferta}")
-                            
+
+                            # --- FILTRO DE IDIOMA ---
+                            lang_blocked, lang_word = self.check_language_in_description(url_oferta)
+                            if lang_blocked:
+                                print(f"         🌐 ──────────────────────────────")
+                                print(f"         🌐 IDIOMA FILTRADO (EmpleosIT)")
+                                print(f"            📌 Título  : {title_text.title()}")
+                                print(f"            🔍 Palabra : '{lang_word}'")
+                                print(f"            🔗 Link    : {url_oferta[:80]}...")
+                                print(f"         🌐 ──────────────────────────────")
+                                continue
+
                             msg = (
                                 f"✨ <b>¡NUEVA OFERTA EN EMPLEOSIT!</b>\n\n"
                                 f"📌 <b>Cargo:</b> {title_text}\n"

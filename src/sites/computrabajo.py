@@ -84,6 +84,18 @@ class ComputrabajoBot(BaseBot):
                                 continue
 
                             print(f"      ✨ MATCH: {title_text} ({match})")
+
+                            # --- FILTRO DE IDIOMA ---
+                            lang_blocked, lang_word = self.check_language_in_description(link_url)
+                            if lang_blocked:
+                                print(f"      🌐 ──────────────────────────────")
+                                print(f"      🌐 IDIOMA FILTRADO (Computrabajo)")
+                                print(f"         📌 Título  : {title_text.title()}")
+                                print(f"         🔍 Palabra : '{lang_word}'")
+                                print(f"         🔗 Link    : {link_url[:80]}...")
+                                print(f"      🌐 ──────────────────────────────")
+                                continue
+
                             self.notify(f"✨ <b>COMPUTRABAJO MATCH!</b>\n\n📌 {title_text}\n🔗 {link_url}")
                             
                             # Abrir oferta

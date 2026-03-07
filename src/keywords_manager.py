@@ -27,16 +27,25 @@ DEFAULT_SEARCH_KEYWORDS = [
     "pasantia programador",
     "pasantia desarrollador",
     "pasante desarrollador",
-    "pasante programador"
+    "pasante programador",
+    "pasante",
+    "soporte",
+    "soporte it",
+    "soporte técnico"
+    "soporte técnico it",
+    "help desk",
+    "helpdesk",
+    "wordpress",
+    "SEO",
+    "elementor",
+    "2026"
 ]
 
 DEFAULT_NEGATIVE_KEYWORDS = [
     "senior", 
-    "sr", 
-    "ssr", 
+    "sr",  
     "lead", 
     "arquitecto", 
-    "+3 años", 
     "+4 años", 
     "+5 años",
     "ingles avanzado", 
@@ -53,16 +62,11 @@ DEFAULT_NEGATIVE_KEYWORDS = [
     "c++",
     "arduino",
     "PLC",
-    "soporte it",
-    "wordpress",
     "devops",
     "sysadmin",
     "php",
     "laravel",
     "django",
-    "fullstack",
-    "full stack",
-    "full-stack",
     "sap",
     "sap abap",
     "abap",
@@ -81,10 +85,6 @@ DEFAULT_NEGATIVE_KEYWORDS = [
     "pruebas",
     "pl",
     "sql",
-    "engineer",
-    "enginner",
-    "enginer",
-    "ingeniero",
     "native",
     "lider",
     "líder",
@@ -92,6 +92,31 @@ DEFAULT_NEGATIVE_KEYWORDS = [
     "next",
     "business",
     "webflow"
+]
+
+DEFAULT_LANGUAGE_KEYWORDS = [
+    "we are looking for", "we are seeking", "you will be", "you will have",
+    "you will work", "you will join", "must have", "nice to have",
+    "about the role", "about the job", "about the company", "about us",
+    "what you'll do", "what you will do", "what we offer", "what we're looking",
+    "who you are", "our team", "our company", "join our",
+    "key responsibilities", "responsibilities", "requirements", "qualifications",
+    "preferred qualifications", "the ideal candidate", "strong knowledge of",
+    "experience with", "experience in", "proficiency in", "familiarity with",
+    "ability to", "we offer", "we provide", "as part of", "as a member",
+    "you'll work", "you'll be", "this role", "this position", "remote work", "work from home",
+    "we believe", "equal opportunity",
+    # Portugués
+    "estamos à procura", "você irá", "você vai", "você será",
+    "você terá", "você deve", "deve ter",
+    "desejável", "conhecimento em", "experiência com", "experiência em",
+    "nossa empresa", "nossa equipe", "faça parte", "venha fazer",
+    "sobre a vaga", "sobre a empresa",
+    # Italiano
+    "stiamo cercando", "cerchiamo", "si offre", "si richiede", "requisiti",
+    "la risorsa", "il candidato", "inserimento",
+    "esperienza in", "esperienza con", "conoscenza di", "ottima conoscenza",
+    "buona conoscenza", "si occuperà", "azienda leader", "offriamo", "chi siamo", "cosa farai"
 ]
 
 def load_keywords():
@@ -104,6 +129,7 @@ def load_keywords():
     if not os.path.exists(KEYWORDS_FILE):
         default_data = {
             "search_keywords": DEFAULT_SEARCH_KEYWORDS,
+            "language_negative_keywords": DEFAULT_LANGUAGE_KEYWORDS,
             "negative_keywords": DEFAULT_NEGATIVE_KEYWORDS
         }
         save_keywords(default_data)
@@ -118,6 +144,7 @@ def load_keywords():
         # En caso de error (archivo corrupto), retornamos los defaults por seguridad
         return {
             "search_keywords": DEFAULT_SEARCH_KEYWORDS,
+            "language_negative_keywords": DEFAULT_LANGUAGE_KEYWORDS,
             "negative_keywords": DEFAULT_NEGATIVE_KEYWORDS
         }
 
@@ -141,6 +168,11 @@ def get_negative_keywords():
     """Retorna la lista actual de palabras clave NEGATIVAS."""
     keywords_data = load_keywords()
     return keywords_data.get("negative_keywords", DEFAULT_NEGATIVE_KEYWORDS)
+
+def get_language_keywords():
+    """Retorna la lista actual de palabras de FILTRO DE IDIOMA (descripción)."""
+    keywords_data = load_keywords()
+    return keywords_data.get("language_negative_keywords", DEFAULT_LANGUAGE_KEYWORDS)
 
 def add_positive_keyword(new_word):
     """
@@ -201,6 +233,33 @@ def remove_negative_keyword(word_to_remove):
     if normalized_word in current_list:
         current_list.remove(normalized_word)
         keywords_data["negative_keywords"] = current_list
+        save_keywords(keywords_data)
+        return True
+    return False
+
+def add_language_keyword(new_word):
+    """
+    Agrega una nueva frase al filtro de idioma.
+    Retorna True si se agregó, False si ya existía.
+    """
+    keywords_data = load_keywords()
+    current_list = keywords_data.get("language_negative_keywords", [])
+    normalized_word = new_word.lower().strip()
+    if normalized_word not in current_list:
+        current_list.append(normalized_word)
+        keywords_data["language_negative_keywords"] = current_list
+        save_keywords(keywords_data)
+        return True
+    return False
+
+def remove_language_keyword(word_to_remove):
+    """Elimina una frase del filtro de idioma."""
+    keywords_data = load_keywords()
+    current_list = keywords_data.get("language_negative_keywords", [])
+    normalized_word = word_to_remove.lower().strip()
+    if normalized_word in current_list:
+        current_list.remove(normalized_word)
+        keywords_data["language_negative_keywords"] = current_list
         save_keywords(keywords_data)
         return True
     return False

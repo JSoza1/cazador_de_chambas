@@ -155,3 +155,64 @@ class BaseBot(ABC):
             # NO agregamos automáticamente. 
             # El usuario debe confirmar por Telegram para que se guarde.
             return True
+
+    def check_language_in_description(self, url):
+        """
+        Navega a la URL del detalle de la oferta en una pestaña nueva,
+        lee todo el texto visible y chequea si hay frases de otro idioma.
+
+        Returns:
+            tuple (bool, str | None):
+                - (True, 'frase detectada') si la descripción está en otro idioma.
+                - (False, None) si pasa el filtro o si ocurre algún error.
+        """
+        from src.keywords_manager import get_language_keywords
+        import time
+
+        language_filters = get_language_keywords()
+        if not language_filters:
+            return False, None
+
+        original_window = self.driver.current_window_handle
+
+        try:
+            # Abrir la URL en una nueva pestaña para no perder el contexto actual
+            self.driver.execute_script(f"window.open('{url}', '_blank');")
+            time.sleep(3)
+
+            # Cambiar a la nueva pestaña
+            new_handles = [h for h in self.driver.window_handles if h != original_window]
+            if not new_handles:
+                return False, None
+
+            self.driver.switch_to.window(new_handles[-1])
+            time.sleep(2)
+
+            # Leer el texto completo de la página
+            try:
+                body_text = self.driver.find_element(By.TAG_NAME, "body").text.lower()
+            except Exception:
+                body_text = ""
+
+            # Cerrar pestaña y volver
+            self.driver.close()
+            self.driver.switch_to.window(original_window)
+
+            # Chequear contra el filtro de idioma
+            for lang_word in language_filters:
+                if lang_word.lower() in body_text:
+                    return True, lang_word
+
+            return False, None
+
+        except Exception as e:
+            print(f"      ⚠️ Error en check_language_in_description: {e}")
+            # Intentamos cerrar la pestaña extra si quedó abierta
+            try:
+                if len(self.driver.window_handles) > 1:
+                    self.driver.close()
+                    self.driver.switch_to.window(original_window)
+            except Exception:
+                pass
+            # No bloqueamos si algo falla — mejor perder un filtro que romper el bot
+            return False, None

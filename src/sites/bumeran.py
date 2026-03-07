@@ -86,6 +86,18 @@ class BumeranBot(BaseBot):
                     # ¡MATCH!
                     print(f"         ✨ ¡MATCH! Coincide con '{match_keyword}'")
                     print(f"            🔗 URL: {url_oferta}")
+
+                    # --- FILTRO DE IDIOMA ---
+                    lang_blocked, lang_word = self.check_language_in_description(url_oferta)
+                    if lang_blocked:
+                        print(f"         🌐 ──────────────────────────────")
+                        print(f"         🌐 IDIOMA FILTRADO (Bumeran)")
+                        print(f"            📌 Título  : {title_text.title()}")
+                        print(f"            🔍 Palabra : '{lang_word}'")
+                        print(f"            🔗 Link    : {url_oferta[:80]}...")
+                        print(f"         🌐 ──────────────────────────────")
+                        continue
+
                     self.notify(f"✨ <b>¡NUEVA OFERTA ENCONTRADA!</b>\n\n📌 <b>Cargo:</b> {title_text.title()}\n🔑 <b>Match:</b> {match_keyword}\n🔗 <a href='{url_oferta}'>Ver Oferta</a>")
                     
                     # Abrir y procesar

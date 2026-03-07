@@ -12,6 +12,7 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 *   **Multi-Sitio & Extensible**: Compatible nativamente con Bumeran, Computrabajo, Andreani, EducaciónIT, BBVA, Vicente López, UTN Talentia y EmpleosIT. Gracias a su arquitectura modular, agregar nuevas bolsas de trabajo es una tarea sencilla.
 *   **Notificaciones en Tiempo Real**: Envía alertas a **Telegram** cada vez que encuentra una oferta interesante.
 *   **Control Interactivo**: Si respondes a una notificación en Telegram con **"ya lo vi"**, **"listo"**, **"este no"**, **"ya esta"** o **"paso"**, el bot dejará de mostrarte esa oferta por 15 días.
+*   **Filtro de Idioma**: Detecta automáticamente si la descripción de un puesto está en inglés, portugués o italiano y lo descarta sin notificarte. Configurable desde Telegram.
 *   **Modular y Escalable**: Estructura preparada para agregar más sitios (Zonajobs, etc.) sin reescribir el núcleo.
 *   **Filtrado Inteligente (Regex)**: Ignora ofertas no aplicables y duplicadas, distinguiendo palabras completas (ej: diferencia 'Sr' de 'Ssr').
 *   **Seguro**: Uso de variables de entorno para la protección de credenciales.
@@ -40,7 +41,7 @@ cazador_de_chambas/
 ├── .env                   # 🔒 SECRETOS: Credenciales de sitios y de Telegram (privado).
 ├── .gitignore             # 🙈 SEGURIDAD: Define qué archivos ocultar a Git.
 ├── seen_jobs.json         # 💾 MEMORIA: Base de datos local de ofertas ya vistas (auto-generado).
-├── keywords.json          # 💾 MEMORIA: Base de datos de palabras clave (auto-generado).
+├── keywords.json          # 💾 MEMORIA: Palabras clave y filtros de idioma (auto-generado).
 ├── last_update.json       # 📡 TELEGRAM: Control de mensajes leídos (auto-generado).
 ├── requirements.txt       # 📦 DEPENDENCIA: Lista de librerías necesarias.
 ├── profile/               # 👤 COOKIES: Carpeta del perfil de Chrome (guarda sesión de LinkedIn).
@@ -48,11 +49,11 @@ cazador_de_chambas/
     ├── config.py          # ⚙️ CONFIGURACIÓN: Carga variables y keywords.
     ├── history.py         # 🧠 MEMORIA: Lógica de persistencia de ofertas.
     ├── listener.py        # 👂 ESCUCHA: Procesa respuestas del usuario en Telegram.
-    ├── keywords_manager.py # 🧠 MEMORIA: Gestión de palabras clave JSON.
+    ├── keywords_manager.py # 🧠 MEMORIA: Gestión de palabras clave y filtros de idioma (JSON).
     ├── notifications.py   # 📢 ALERTAS: Sistema de envío de mensajes a Telegram.
     ├── driver.py          # 🚗 MOTOR: Maneja el navegador (Chrome) y modos Headless.
     └── sites/             # 🌐 SITIOS: Aquí vive la lógica de cada página web.
-        ├── base.py        # 📋 PLANTILLA: Define reglas comunes (login, buscar, notificar).
+        ├── base.py        # 📋 PLANTILLA: Define reglas comunes (filtrado, notificar, filtro de idioma).
         ├── linkedin.py    # 🆕 LINKEDIN: Bot especializado con scroll y cookies persistentes.
         ├── andreani.py    # 👷 BOT: Implementación para Andreani.
         ├── bbva.py        # 👷 BOT: Implementación para BBVA.
@@ -70,17 +71,58 @@ cazador_de_chambas/
 
 Una vez configurado el bot, puedes controlarlo dinámicamente desde el chat sin reiniciar:
 
-| Acción | Comando Principal | Alias (Más cortos) | Ejemplo |
+### 🚫 Palabras Negativas de Título
+Se aplican al **título** del puesto. Si el título contiene alguna, se ignora.
+
+| Acción | Comando Principal | Alias | Ejemplo |
 |:---|:---|:---|:---|
-| **Agregar Negativa** 🚫 | `/addneg <palabra>` | `/menos`, `/an` | `/menos wordpress` |
-| **Eliminar Negativa** 🗑️ | `/delneg <palabra>` | `/sacarmenos`, `/dn` | `/dn php` |
-| **Agregar Positiva** ✅ | `/addpos <palabra>` | `/mas`, `/ap` | `/mas rust` |
-| **Eliminar Positiva** 🗑️ | `/delpos <palabra>` | `/sacarmas`, `/dp` | `/dp react` |
-| **Ver Negativas** 📜 | `/listneg` | `/vermenos`, `/ln` | `/ln` |
-| **Ver Positivas** 📜 | `/listpos` | `/vermas`, `/lp` | `/lp` |
-| **Ayuda / Comandos** ℹ️ | `/comandos` | `/help`, `/ayuda` | `/ayuda` |
-| **Archivar Oferta** 🗃️ | `ya lo vi` | `listo`, `paso`, `visto` | *(Responder al mensaje del bot)* |
-| **Apagar Bot** 🛑 | `/stop` | `/shutdown`, `/apagar`, `/exit` | `/stop` |
+| Agregar negativa | `/addneg <palabra>` | `/menos`, `/an` | `/menos wordpress` |
+| Eliminar negativa | `/delneg <palabra>` | `/sacarmenos`, `/dn` | `/dn php` |
+| Ver negativas | `/listneg` | `/vermenos`, `/ln` | `/ln` |
+
+### ✅ Palabras Positivas de Título
+El título debe contener al menos una de estas para ser notificado.
+
+| Acción | Comando Principal | Alias | Ejemplo |
+|:---|:---|:---|:---|
+| Agregar positiva | `/addpos <palabra>` | `/mas`, `/ap` | `/mas typescript` |
+| Eliminar positiva | `/delpos <palabra>` | `/sacarmas`, `/dp` | `/dp react` |
+| Ver positivas | `/listpos` | `/vermas`, `/lp` | `/lp` |
+
+### 🌐 Filtro de Idioma (descripción del puesto)
+Se aplica a la **descripción** del puesto, solo cuando el título ya pasó los filtros anteriores. Si la descripción contiene alguna de estas frases, el puesto se descarta silenciosamente (no se notifica por Telegram, pero sí aparece en el log de consola). Acepta frases con espacios, sin comillas.
+
+| Acción | Comando Principal | Alias | Ejemplo |
+|:---|:---|:---|:---|
+| Agregar frase | `/addidioma <frase>` | `/ai` | `/addidioma requirements` |
+| Eliminar frase | `/sacaridioma <frase>` | `/si` | `/sacaridioma requirements` |
+| Ver frases | `/veridioma` | `/vi` | `/vi` |
+
+> Por defecto ya incluye frases comunes de descripciones en **inglés**, **portugués** e **italiano**.
+
+### 🗃️ Otras Acciones
+
+| Acción | Comando | Notas |
+|:---|:---|:---|
+| Archivar oferta | `ya lo vi` / `listo` / `paso` | Responder al mensaje del bot con la oferta |
+| Ayuda / Comandos | `/comandos` | También `/help`, `/ayuda` |
+| Apagar Bot | `/stop` | También `/shutdown`, `/apagar`, `/exit` |
+
+---
+
+## 🔍 Cómo funciona el filtrado
+
+El bot aplica los filtros en este orden para cada oferta encontrada:
+
+```
+1. ¿Ya fue vista antes?           → Si sí, ignorar.
+2. ¿Contiene palabra negativa?    → Si sí, ignorar el título.
+3. ¿Contiene palabra positiva?    → Si no, ignorar el título.
+4. ¿Descripción en otro idioma?   → Si sí, ignorar silenciosamente (log en consola).
+5. ✅ ¡Match! → Notificar por Telegram.
+```
+
+El filtro de idioma funciona abriendo el detalle de cada oferta que ya pasó los pasos 1-3, leyendo el texto completo y buscando frases características de descripciones en inglés, portugués o italiano.
 
 ---
 

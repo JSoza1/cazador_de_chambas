@@ -12,7 +12,10 @@ from src.keywords_manager import (
     get_negative_keywords, 
     get_positive_keywords,
     remove_negative_keyword,
-    remove_positive_keyword
+    remove_positive_keyword,
+    add_language_keyword,
+    remove_language_keyword,
+    get_language_keywords
 )
 
 # Archivo de control para persistencia del offset de actualizaciones (evita reprocesamiento)
@@ -222,18 +225,60 @@ def check_telegram_replies():
                     else:
                         send_msg(chat_id, response_message)
 
+                # === BLOQUE: AGREGAR FILTRO DE IDIOMA ===
+                elif command_name in ["/addidioma", "/ai"]:
+                    if argument_word:
+                        if add_language_keyword(argument_word):
+                            msg = f"🌐 Filtro de idioma agregado: '{argument_word}'"
+                            print(f"   🌐 [CMD] Usuario agregó IDIOMA: {argument_word}")
+                            send_msg(chat_id, msg)
+                        else:
+                            msg = f"⚠️ La frase '{argument_word}' ya estaba en el filtro de idioma."
+                            send_msg(chat_id, msg)
+                    else:
+                        send_msg(chat_id, "⚠️ Uso correcto: /addidioma <frase>")
+
+                # === BLOQUE: ELIMINAR FILTRO DE IDIOMA ===
+                elif command_name in ["/sacaridioma", "/si"]:
+                    if argument_word:
+                        if remove_language_keyword(argument_word):
+                            msg = f"🗑️ Filtro de idioma eliminado: '{argument_word}'"
+                            print(f"   🗑️ [CMD] Usuario eliminó IDIOMA: {argument_word}")
+                            send_msg(chat_id, msg)
+                        else:
+                            msg = f"⚠️ La frase '{argument_word}' no estaba en el filtro de idioma."
+                            send_msg(chat_id, msg)
+                    else:
+                        send_msg(chat_id, "⚠️ Uso correcto: /sacaridioma <frase>")
+
+                # === BLOQUE: LISTAR FILTRO DE IDIOMA ===
+                elif command_name in ["/veridioma", "/listidioma", "/vi"]:
+                    language_list = get_language_keywords()
+                    language_list.sort()
+                    print(f"   ℹ️ [CMD] Usuario solicitó lista de FILTROS DE IDIOMA.")
+                    response_message = "🌐 **Filtro de Idioma:**\n\n" + ", ".join(language_list)
+                    if len(response_message) > 4000:
+                        for i in range(0, len(response_message), 4000):
+                            send_msg(chat_id, response_message[i:i+4000])
+                    else:
+                        send_msg(chat_id, response_message)
+
                 # === BLOQUE: AYUDA / COMANDOS ===
                 elif command_name in ["/comandos", "/help", "/ayuda"]:
                     help_text = (
                         "🤖 **Comandos Disponibles:**\n\n"
-                        "🚫 **Negativas (Ignorar):**\n"
+                        "🚫 **Negativas (Ignorar título):**\n"
                         "• Agregar: `/addneg`, `/menos`, `/an` <palabra>\n"
                         "• Eliminar: `/delneg`, `/sacarmenos` <palabra>\n"
                         "• Listar: `/listneg`, `/vermenos`, `/ln`\n\n"
-                        "✅ **Positivas (Buscar):**\n"
+                        "✅ **Positivas (Buscar en título):**\n"
                         "• Agregar: `/addpos`, `/mas`, `/ap` <palabra>\n"
                         "• Eliminar: `/delpos`, `/sacarmas` <palabra>\n"
                         "• Listar: `/listpos`, `/vermas`, `/lp`\n\n"
+                        "🌐 **Filtro de Idioma (descripción del puesto):**\n"
+                        "• Agregar: `/addidioma`, `/ai` <frase>\n"
+                        "• Eliminar: `/sacaridioma`, `/si` <frase>\n"
+                        "• Listar: `/veridioma`, `/vi`\n\n"
                         "ℹ️ **Ayuda:**\n"
                         "• `/comandos`, `/help`, `/ayuda`\n\n"
                         "🗃️ **Acciones:**\n"

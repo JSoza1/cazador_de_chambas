@@ -145,10 +145,19 @@ class TalentiaBot(BaseBot):
                             continue
 
                         found_any = True
-                        # Evitamos duplicados en el mismo ciclo (aunque la paginación lo soluciona)
                         print(f"         ✨ ¡MATCH! Coincide con '{match_keyword}'")
                         print(f"            🔗 Portal: {url_oferta}")
-                        
+
+                        # --- FILTRO DE IDIOMA ---
+                        lang_blocked, lang_word = self.check_language_in_description(url_oferta)
+                        if lang_blocked:
+                            print(f"         🌐 ──────────────────────────────")
+                            print(f"         🌐 IDIOMA FILTRADO (Talentia)")
+                            print(f"            📌 Título  : {title_text.title()}")
+                            print(f"            🔍 Palabra : '{lang_word}'")
+                            print(f"         🌐 ──────────────────────────────")
+                            continue
+
                         msg = (
                             f"✨ <b>¡NUEVA OFERTA EN UTN TALENTIA!</b>\n\n"
                             f"📌 <b>Cargo:</b> {title_text}\n"

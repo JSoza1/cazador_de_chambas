@@ -6,6 +6,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 from src.config import JOB_SEARCH_URLS, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS
 from src.listener import check_telegram_replies
+from src.keywords_manager import get_language_keywords
+from src.history import history
 
 class LinkedInBot(BaseBot):
     """
@@ -194,7 +196,44 @@ class LinkedInBot(BaseBot):
                             if match_keyword:
                                 found_on_page += 1
                                 print(f"      ✨ MATCH: {title_text}")
-                                
+
+                                # --- FILTRO DE IDIOMA (panel lateral) ---
+                                current_language_filters = get_language_keywords()
+                                language_blocked = False
+                                blocking_word = None
+
+                                if current_language_filters:
+                                    try:
+                                        card.click()
+                                        time.sleep(3)
+                                        try:
+                                            desc_element = self.driver.find_element(
+                                                By.CSS_SELECTOR,
+                                                ".jobs-description__content, .jobs-description, .job-view-layout"
+                                            )
+                                            description_text = desc_element.text.lower()
+                                        except Exception:
+                                            description_text = ""
+
+                                        for lang_word in current_language_filters:
+                                            if lang_word.lower() in description_text:
+                                                language_blocked = True
+                                                blocking_word = lang_word
+                                                break
+                                    except Exception as e:
+                                        print(f"      ⚠️ Error leyendo descripción: {e}")
+
+                                if language_blocked:
+                                    print(f"      🌐 ──────────────────────────────")
+                                    print(f"      🌐 IDIOMA FILTRADO (LinkedIn)")
+                                    print(f"         📌 Título  : {title_text.title()}")
+                                    print(f"         🔍 Palabra : '{blocking_word}'")
+                                    print(f"         🔗 Link    : {link[:80]}...")
+                                    print(f"      🌐 ──────────────────────────────")
+                                    history.add_job(link)
+                                    continue
+
+                                history.add_job(link)
                                 msg = (
                                     f"✨ <b>MATCH DETECTADO (LinkedIn)</b>\n"
                                     f"📌 <b>{title_text.title()}</b>\n"
