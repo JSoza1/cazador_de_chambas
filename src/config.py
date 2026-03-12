@@ -1,95 +1,81 @@
 """
-MÓDULO DE CONFIGURACIÓN
------------------------
-Este archivo centraliza todas las variables configurables del proyecto.
-Permite ajustar el comportamiento del bot sin modificar el código fuente principal.
+Módulo de configuración central del proyecto.
 
-- Carga credenciales desde .env
-- Define palabras clave de búsqueda
-- Controla tiempos de espera
+Carga credenciales desde el archivo .env y expone todas las variables
+configurables del bot. Modificar este archivo (o el .env) es suficiente
+para ajustar el comportamiento sin tocar el código fuente.
 """
 import os
 import sys
 from dotenv import load_dotenv
 
-# Carga de variables del archivo .env
-# Búsqueda automática del archivo .env en la raíz del proyecto
 load_dotenv()
+
 
 def get_env_variable(var_name, default=None, required=True):
     """
-    Obtiene una variable de entorno con manejo de errores para valores faltantes.
-    
+    Obtiene una variable de entorno con validación integrada.
+
     Args:
-        var_name (str): El nombre de la variable (ej: 'BUMERAN_EMAIL')
-        default: Valor por defecto si no existe la variable.
+        var_name (str): Nombre de la variable de entorno.
+        default: Valor por defecto si la variable no está definida.
         required (bool): Si es True y la variable no existe, detiene la ejecución.
-        
+
     Returns:
-        str: El valor de la variable.
+        str: El valor de la variable de entorno.
     """
     value = os.getenv(var_name, default)
-    
+
     if required and not value:
         print(f"❌ Error Crítico: La variable de entorno '{var_name}' no está definida.")
         print("   Verificar el archivo .env")
-        sys.exit(1) # Detiene el programa indicando error
-        
+        sys.exit(1)
+
     return value
 
 
-
-# Credenciales de Telegram
+# --- CREDENCIALES ---
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+TELEGRAM_CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
-# Ruta de Perfil Personalizada (Opcional)
-# Permite especificar una ruta a un perfil de Chrome existente.
+# Ruta al perfil de Chrome para persistir sesiones entre ejecuciones (ej: LinkedIn).
+# Si no se define, se usa la carpeta 'profile/' en la raíz del proyecto.
 CHROME_PROFILE_PATH = os.getenv("CHROME_PROFILE_PATH")
 
-# --- URLs DE BÚSQUEDA LINKEDIN ---
-# El bot recorrerá cada una de estas URLs secuencialmente.
+# --- URLS DE BÚSQUEDA DE LINKEDIN ---
+# El bot recorre cada URL secuencialmente. Cada una representa una búsqueda
+# con filtros distintos (país, modalidad, keyword).
 JOB_SEARCH_URLS = [
-    # === Filtros de ultima semana ===
-    # Desarrollador ARG
+    # Desarrollador — Argentina
     "https://www.linkedin.com/jobs/search/?currentJobId=4353192033&f_AL=true&f_TPR=r604800&geoId=100446943&keywords=Desarrollador&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
 
-    # Desarrollador España (Remoto)
+    # Desarrollador — España (Remoto)
     "https://www.linkedin.com/jobs/search/?currentJobId=4352619718&f_AL=true&f_TPR=r604800&f_WT=2&geoId=105646813&keywords=Desarrollador&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
 
-    # Desarrollador Todo el mundo (Remoto)
+    # Desarrollador — Todo el mundo (Remoto)
     "https://www.linkedin.com/jobs/search/?currentJobId=4361667042&f_AL=true&f_TPR=r604800&f_WT=2&geoId=92000000&keywords=Desarrollador&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true&sortBy=DD",
 
-    # Programador ARG
+    # Programador — Argentina
     "https://www.linkedin.com/jobs/search/?currentJobId=4353004987&f_AL=true&f_TPR=r604800&geoId=100446943&keywords=Programador&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
 
-    # Programador España (Remoto)
+    # Programador — España (Remoto)
     "https://www.linkedin.com/jobs/search/?currentJobId=4353084758&f_AL=true&f_TPR=r604800&f_WT=2&geoId=105646813&keywords=Programador&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
 
-    # Programador Todo el mundo (Remoto)
-    "https://www.linkedin.com/jobs/search/?currentJobId=4359080675&f_AL=true&f_TPR=r604800&f_WT=2&geoId=92000000&keywords=Programador&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true&sortBy=DD"
+    # Programador — Todo el mundo (Remoto)
+    "https://www.linkedin.com/jobs/search/?currentJobId=4359080675&f_AL=true&f_TPR=r604800&f_WT=2&geoId=92000000&keywords=Programador&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true&sortBy=DD",
 ]
 
 from src.keywords_manager import get_positive_keywords, get_negative_keywords
 
-# --- CONFIGURACIÓN DE BÚSQUEDA ---
-
-# 1. Palabras Clave POSITIVAS
-# El sistema buscará estas palabras en los TÍTULOS de las ofertas.
-# Ahora se cargan dinámicamente desde keywords.json
-SEARCH_KEYWORDS = get_positive_keywords()
-
-# 2. Palabras Clave NEGATIVAS
-# Si el título contiene alguna de estas palabras, la oferta se DESCARTA automáticamente.
-# Ahora se cargan dinámicamente desde keywords.json
+# Palabras clave cargadas dinámicamente desde keywords.json.
+# Se gestionan en tiempo de ejecución via Telegram sin necesidad de reiniciar el bot.
+SEARCH_KEYWORDS   = get_positive_keywords()
 NEGATIVE_KEYWORDS = get_negative_keywords()
 
 # --- CONFIGURACIÓN TÉCNICA ---
 
-# Tiempo de espera entre rondas de búsqueda (en minutos)
-# 60 minutos = 1 hora / 360 minutos = 6 horas
+# Tiempo de espera entre ciclos de búsqueda (en minutos).
 CHECK_INTERVAL_MINUTES = 360
 
-# Modo Headless (True = Navegador oculto / False = Navegador visible para depuración)
-# False recomendado para desarrollo, True para servidores.
+# Modo sin interfaz gráfica. True para servidores o uso en segundo plano.
 HEADLESS_MODE = True

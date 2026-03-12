@@ -2,261 +2,220 @@ from src.sites.base import BaseBot
 import os
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 import time
 from src.config import JOB_SEARCH_URLS, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS
 from src.listener import check_telegram_replies
 from src.keywords_manager import get_language_keywords
 from src.history import history, normalize_url
 
+
 class LinkedInBot(BaseBot):
     """
-    Bot para búsqueda de empleo en LinkedIn.
-    
-    HERENCIA:
-    Hereda de 'BaseBot' (src/sites/base.py), lo que le da acceso a métodos comunes
-    como self.notify() para Telegram, self.driver para el navegador, etc.
-    
-    ESTRATEGIA:
-    LinkedIn tiene medidas anti-bot muy fuertes. Para evitarlas, NO hacemos login
-    con usuario/contraseña en cada ejecución. En su lugar, usamos un PERFIL DE CHROME
-    PERSISTENTE (una carpeta donde Chrome guarda cookies).
-    
-    1. La primera vez, el usuario se loguea manualmente.
-    2. Las cookies quedan guardadas en la carpeta 'profile'.
-    3. En futuras ejecuciones, el bot ya entra 'logueado'.
+    Bot de búsqueda para LinkedIn.
+
+    LinkedIn implementa medidas anti-automatización avanzadas. Para mantener
+    la sesión activa se utiliza un perfil de Chrome persistente (./profile/):
+    el usuario inicia sesión manualmente la primera vez y las cookies se
+    conservan entre ejecuciones.
+
+    Para cada URL configurada en JOB_SEARCH_URLS, el bot realiza una maniobra
+    de "salto 1→2→1" en la primera página para activar el lazy loading de
+    LinkedIn y garantizar que todos los resultados se rendericen correctamente.
+    Luego extrae tarjetas de empleo paginando hasta max_pages o hasta que el
+    botón "Siguiente" esté deshabilitado.
+
+    El filtro de idioma se aplica leyendo el panel lateral de descripción sin
+    abrir una nueva pestaña, lo que es más eficiente en LinkedIn.
     """
-    
+
     def login(self):
-        # Al usar perfil persistente, asumimos que ya está logueado o que 
-        # el usuario lo hará manualmente si es necesario la primera vez.
+        """Sesión gestionada via perfil persistente. No se requiere acción."""
         print("   ℹ️  Usando sesión de LinkedIn del perfil persistente.")
-        pass
 
     def search(self):
         """
-        Itera sobre las URLs configuradas y extrae ofertas.
+        Recorre todas las URLs de búsqueda configuradas y procesa las ofertas.
         """
-        # Notificación al iniciar el módulo LinkedIn
         self.notify("🤖 Buscando chamba por LinkedIn!")
 
         for url_index, base_url in enumerate(JOB_SEARCH_URLS):
-            print(f"\n   🌍 [LinkedIn] Iniciando Búsqueda #{url_index + 1}")
+            print(f"\n   🌍 [LinkedIn] Búsqueda #{url_index + 1}")
             print(f"   🔗 URL: {base_url}")
-            
-            try:
-                # Chequeo de comandos ANTES de empezar nueva ronda
-                check_telegram_replies()
-                
-                print("   🌐 Navegando...")
-                self.driver.get(base_url)
-                time.sleep(5) # Espera inicial
 
-                page_num = 1
-                max_pages = 18 # Límite de seguridad
-                
+            try:
+                check_telegram_replies()
+
+                self.driver.get(base_url)
+                time.sleep(5)
+
+                page_num    = 1
+                max_pages   = 18
                 fix_applied = False
-                
+
                 while page_num <= max_pages:
-                    # =========================================================================
-                    # 🌀 MANIOBRA "SALTO DE PÁGINA" (ANTI-BLOQUEO DE SCROLL)
-                    # =========================================================================
-                    # Problema: En la primera página, a veces LinkedIn "congela" el scroll
-                    # o los elementos no cargan dinámicamente porque el foco del navegador
-                    # no está bien establecido en modo automático.
-                    #
-                    # Solución: Forzamos una interacción real:
-                    # 1. Bajamos al pie de página.
-                    # 2. Vamos a la página 2.
-                    # 3. Scrolleamos un poco en la página 2.
-                    # 4. Volvemos a la página 1 con el botón "Anterior".
-                    #
-                    # Esto "despierta" los scripts de carga dinámica (Lazy Loading) de LinkedIn.
-                    # Solo lo hacemos una vez al principio (if not fix_applied).
-                    # =========================================================================
+                    # Maniobra de activación de lazy loading (solo en la primera página).
+                    # Navegar a la página 2 y volver a la 1 fuerza a LinkedIn a renderizar
+                    # dinámicamente todos los resultados de la primera página.
                     if page_num == 1 and not fix_applied:
                         try:
-                            # Detectar entorno
-                            is_android = "ANDROID_ROOT" in os.environ
-                            maniobra_msg = "🔄 Maniobra Especial (PC)" if not is_android else "🔄 Maniobra Especial (Android/JS)"
-                            print(f"      {maniobra_msg}: Ir a Pág 2 -> Scroll -> Volver...")
-                            
-                            # 1. Bajar al fondo
-                            self.driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+                            is_android  = "ANDROID_ROOT" in os.environ
+                            maniobra_msg = "🔄 Activando carga dinámica (PC)" if not is_android else "🔄 Activando carga dinámica (Android/JS)"
+                            print(f"      {maniobra_msg}: Pág 1 → 2 → 1...")
+
+                            self.driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
                             time.sleep(2)
-                            
-                            # 2. Click 'Siguiente'
-                            next_btn = self.driver.find_element(By.CSS_SELECTOR, "button.jobs-search-pagination__button--next")
-                            
+
+                            next_btn = self.driver.find_element(
+                                By.CSS_SELECTOR, "button.jobs-search-pagination__button--next"
+                            )
+
                             if is_android:
-                                # ANDROID: Click nuclear con JS (ignora superposiciones)
                                 self.driver.execute_script("arguments[0].click();", next_btn)
                             else:
-                                # PC: Click normal
                                 next_btn.click()
-                                
-                            wait_time = 8 if is_android else 4
-                            time.sleep(wait_time)
-                            
-                            # 3. Scrollear un poco en Pág 2
-                            body = self.driver.find_element(By.TAG_NAME, 'body')
+
+                            time.sleep(8 if is_android else 4)
+
+                            body = self.driver.find_element(By.TAG_NAME, "body")
                             for _ in range(5):
                                 body.send_keys(Keys.PAGE_DOWN)
                                 time.sleep(0.5)
                             time.sleep(1)
-                            
-                            # 4. Click 'Anterior' para volver a Pág 1
-                            prev_btn = self.driver.find_element(By.CSS_SELECTOR, "button.jobs-search-pagination__button--previous")
-                            
+
+                            prev_btn = self.driver.find_element(
+                                By.CSS_SELECTOR, "button.jobs-search-pagination__button--previous"
+                            )
+
                             if is_android:
-                                # ANDROID: Click nuclear con JS
                                 self.driver.execute_script("arguments[0].click();", prev_btn)
                             else:
-                                # PC: Click normal
                                 prev_btn.click()
-                                
-                            print("      🔙 Volviendo a Pág 1...")
-                            wait_time = 8 if is_android else 4
-                            time.sleep(wait_time)
-                            
-                            fix_applied = True # ¡Listo! No lo volvemos a hacer en esta URL.
-                        except Exception as e:
-                            print(f"      ⚠️ No se pudo realizar la maniobra 1->2->1: {e}")
 
-                            # Si falla, marcamos como hecho para no quedarnos en un bucle infinito
+                            print("      🔙 Volviendo a Pág 1...")
+                            time.sleep(8 if is_android else 4)
+
+                        except Exception as e:
+                            print(f"      ⚠️ No se pudo completar la maniobra 1→2→1: {e}")
+                        finally:
                             fix_applied = True
 
-                    # Chequeo de comandos EN CADA PÁGINA
                     check_telegram_replies()
-                    
                     print(f"\n   📄 [LinkedIn #{url_index + 1}] Procesando PÁGINA {page_num}...")
-                    
-                    # --- SCROLL GLOBAL CON TECLADO (El ganador 🏆) ---
-                    # Probado que funciona mejor: enviar PAGE_DOWN al body directamente.
+
+                    # Scroll progresivo para activar la carga de tarjetas restantes.
+                    # LinkedIn usa lazy loading: el contenido aparece al scrollear.
                     try:
-                        print("      ⬇️ Scrolleando con teclado (Global)...")
-                        
-                        # Intento de foco: click en el contenedor de resultados (ayuda en página 1)
+                        print("      ⬇️ Scrolleando para cargar contenido...")
                         try:
                             self.driver.find_element(By.CSS_SELECTOR, ".jobs-search-results-list").click()
-                        except:
+                        except Exception:
                             pass
 
-                        body = self.driver.find_element(By.TAG_NAME, 'body')
-                        
-                        # 8 pulsaciones de PAGE_DOWN para asegurar carga profunda
-                        # Ajustamos velocidad para Android
-                        is_android = "ANDROID_ROOT" in os.environ
+                        is_android  = "ANDROID_ROOT" in os.environ
                         scroll_wait = 1.6 if is_android else 0.8
-                        final_wait = 5 if is_android else 2
-                        
-                        for k in range(8): 
+                        final_wait  = 5 if is_android else 2
+                        body        = self.driver.find_element(By.TAG_NAME, "body")
+
+                        for _ in range(8):
                             body.send_keys(Keys.PAGE_DOWN)
-                            time.sleep(scroll_wait) # Espera para carga de contenido (lazy loading)
-                            
-                        # Pequeña espera final
+                            time.sleep(scroll_wait)
+
                         time.sleep(final_wait)
-                            
+
                     except Exception as e:
-                        print(f"   ⚠️ Error en scroll de teclado: {e}")
-                    
-                    # --- EXTRAYENDO TARJETAS ---
+                        print(f"   ⚠️ Error en scroll: {e}")
+
                     job_cards = self.driver.find_elements(By.CSS_SELECTOR, "div.job-card-container")
-                    
                     print(f"   🔎 Analizando {len(job_cards)} tarjetas en esta página...")
-                    
+
                     found_on_page = 0
-                    
+
                     for card in job_cards:
                         try:
-                            # Buscamos el título dentro de la tarjeta
-                            title_element = card.find_element(By.CSS_SELECTOR, "a.job-card-container__link, a.job-card-list__title--link")
-                            
+                            title_element = card.find_element(
+                                By.CSS_SELECTOR,
+                                "a.job-card-container__link, a.job-card-list__title--link",
+                            )
+
                             title_text = title_element.text.strip().lower()
                             title_text = title_text.replace("\n", " ").replace("solicitud sencilla", "")
-                            
-                            link = normalize_url(title_element.get_attribute("href"))
-                            
-                            if len(title_text) < 3: continue
+                            link       = normalize_url(title_element.get_attribute("href"))
 
-                            # --- CHECK HISTORIAL ---
-                            if not self.check_and_track(link):
-                                # Si devuelve False, es que ya fue vista (o descartada por historial)
-                                # Nota: check_and_track verifica history.is_seen internally
+                            if len(title_text) < 3:
                                 continue
-                            
-                            # --- FILTRADO ---
-                            # Usamos la lógica de BaseBot si es compatible, o la custom si preferimos.
-                            # BaseBot.validate_job_title devuelve la keyword si hizo match, o None.
-                            # Pero BaseBot.validate_job_title NO maneja "solicitud sencilla" removal etc, 
-                            # aunque ya lo hicimos arriba.
-                            
+
+                            if not self.check_and_track(link):
+                                continue
+
                             match_keyword = self.validate_job_title(title_text, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS)
-                            
-                            if match_keyword:
-                                found_on_page += 1
-                                print(f"      ✨ MATCH: {title_text}")
 
-                                # --- FILTRO DE IDIOMA (panel lateral) ---
-                                current_language_filters = get_language_keywords()
-                                language_blocked = False
-                                blocking_word = None
+                            if not match_keyword:
+                                continue
 
-                                if current_language_filters:
+                            found_on_page += 1
+                            print(f"      ✨ MATCH: {title_text}")
+
+                            # Filtro de idioma: se lee el panel lateral de descripción
+                            # sin abrir nueva pestaña (LinkedIn lo renderiza en el mismo DOM).
+                            current_language_filters = get_language_keywords()
+                            language_blocked = False
+                            blocking_word    = None
+
+                            if current_language_filters:
+                                try:
+                                    card.click()
+                                    time.sleep(3)
                                     try:
-                                        card.click()
-                                        time.sleep(3)
-                                        try:
-                                            desc_element = self.driver.find_element(
-                                                By.CSS_SELECTOR,
-                                                ".jobs-description__content, .jobs-description, .job-view-layout"
-                                            )
-                                            description_text = desc_element.text.lower()
-                                        except Exception:
-                                            description_text = ""
+                                        desc_element     = self.driver.find_element(
+                                            By.CSS_SELECTOR,
+                                            ".jobs-description__content, .jobs-description, .job-view-layout",
+                                        )
+                                        description_text = desc_element.text.lower()
+                                    except Exception:
+                                        description_text = ""
 
-                                        for lang_word in current_language_filters:
-                                            if lang_word.lower() in description_text:
-                                                language_blocked = True
-                                                blocking_word = lang_word
-                                                break
-                                    except Exception as e:
-                                        print(f"      ⚠️ Error leyendo descripción: {e}")
+                                    for lang_word in current_language_filters:
+                                        if lang_word.lower() in description_text:
+                                            language_blocked = True
+                                            blocking_word    = lang_word
+                                            break
+                                except Exception as e:
+                                    print(f"      ⚠️ Error leyendo descripción: {e}")
 
-                                if language_blocked:
-                                    print(f"      🌐 ──────────────────────────────")
-                                    print(f"      🌐 IDIOMA FILTRADO (LinkedIn)")
-                                    print(f"         📌 Título  : {title_text.title()}")
-                                    print(f"         🔍 Palabra : '{blocking_word}'")
-                                    print(f"         🔗 Link    : {link[:80]}...")
-                                    print(f"      🌐 ──────────────────────────────")
-                                    history.add_job(link)
-                                    continue
-
+                            if language_blocked:
+                                print(f"      🌐 ──────────────────────────────")
+                                print(f"      🌐 IDIOMA FILTRADO (LinkedIn)")
+                                print(f"         📌 Título  : {title_text.title()}")
+                                print(f"         🔍 Palabra : '{blocking_word}'")
+                                print(f"         🔗 Link    : {link[:80]}...")
+                                print(f"      🌐 ──────────────────────────────")
                                 history.add_job(link)
-                                msg = (
-                                    f"✨ <b>MATCH DETECTADO (LinkedIn)</b>\n"
-                                    f"📌 <b>{title_text.title()}</b>\n"
-                                    f"🔗 <a href='{link}'>Ver Oferta</a>"
-                                )
-                                self.notify(msg)
+                                continue
+
+                            history.add_job(link)
+                            self.notify(
+                                f"✨ <b>MATCH DETECTADO (LinkedIn)</b>\n"
+                                f"📌 <b>{title_text.title()}</b>\n"
+                                f"🔗 <a href='{link}'>Ver Oferta</a>"
+                            )
 
                         except Exception:
                             continue
 
                     print(f"   ✅ Página {page_num} terminada. Matches nuevos: {found_on_page}")
 
-                    # --- PAGINACIÓN ---
+                    # Paginación: avanzar a la siguiente página si el botón está activo
                     try:
-                        next_btn = self.driver.find_element(By.CSS_SELECTOR, "button.jobs-search-pagination__button--next")
-                        
+                        next_btn = self.driver.find_element(
+                            By.CSS_SELECTOR, "button.jobs-search-pagination__button--next"
+                        )
                         if next_btn.is_enabled():
                             print("   ➡️ Avanzando a siguiente página...")
                             next_btn.click()
-                            time.sleep(5) # Esperar carga de nueva página
+                            time.sleep(5)
                             page_num += 1
                         else:
-                            print("   ⏹️ Botón 'Siguiente' deshabilitado. Fin de esta búsqueda.")
+                            print("   ⏹️ Fin de resultados para esta búsqueda.")
                             break
                     except Exception:
                         print("   ⏹️ No se encontró botón 'Siguiente'. Fin de esta búsqueda.")
@@ -264,4 +223,4 @@ class LinkedInBot(BaseBot):
 
             except Exception as e:
                 print(f"   ❌ Error en búsqueda #{url_index + 1}: {e}")
-                continue # Pasar a la siguiente URL si falla una
+                continue

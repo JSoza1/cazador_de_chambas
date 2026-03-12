@@ -1,19 +1,19 @@
-
 import json
 import os
 
-# Nombre del archivo donde se guardarán las palabras clave de forma persistente
+
 KEYWORDS_FILE = "keywords.json"
 
-# Listas por defecto (Copiadas del config original de cazador_de_chambas)
+# Valores por defecto usados al crear el archivo por primera vez.
+# También actúan de fallback si el archivo está corrupto o no accesible.
 DEFAULT_SEARCH_KEYWORDS = [
-    "desarrollo web", 
-    "frontend", 
-    "programador web", 
+    "desarrollo web",
+    "frontend",
+    "programador web",
     "python",
     "programador",
     "react",
-    "javascript",  
+    "javascript",
     "maquetador web",
     "web developer",
     "front-end",
@@ -31,70 +31,37 @@ DEFAULT_SEARCH_KEYWORDS = [
     "pasante",
     "soporte",
     "soporte it",
-    "soporte técnico"
+    "soporte técnico",
     "soporte técnico it",
     "help desk",
     "helpdesk",
     "wordpress",
     "SEO",
     "elementor",
-    "2026"
+    "2026",
 ]
 
 DEFAULT_NEGATIVE_KEYWORDS = [
-    "senior", 
-    "sr",  
-    "lead", 
-    "arquitecto", 
-    "+4 años", 
-    "+5 años",
-    "ingles avanzado", 
-    "bilingue",
-    ".net",
-    "net",
-    "cobol",
-    "angular",
-    "vue",
-    "analista de datos",
-    "power bi",
-    "qa",
-    "c#",
-    "c++",
-    "arduino",
-    "PLC",
-    "devops",
-    "sysadmin",
-    "php",
-    "laravel",
-    "django",
-    "sap",
-    "sap abap",
-    "abap",
-    "cloud",
-    "aws",
-    "azure",
-    "google cloud",
-    "google-cloud",
-    "java",
-    "data science",
-    "data",
-    "ux/ui",
-    "ux ui",
-    "ux",
-    "ui",
-    "pruebas",
-    "pl",
-    "sql",
-    "native",
-    "lider",
-    "líder",
-    "next.js",
-    "next",
-    "business",
-    "webflow"
+    "senior", "sr", "lead", "arquitecto",
+    "+4 años", "+5 años",
+    "ingles avanzado", "bilingue",
+    ".net", "net", "cobol", "angular", "vue",
+    "analista de datos", "power bi",
+    "qa", "c#", "c++", "arduino", "PLC",
+    "devops", "sysadmin",
+    "php", "laravel", "django",
+    "sap", "sap abap", "abap",
+    "cloud", "aws", "azure", "google cloud", "google-cloud",
+    "java", "data science", "data",
+    "ux/ui", "ux ui", "ux", "ui",
+    "pruebas", "pl", "sql", "native",
+    "lider", "líder",
+    "next.js", "next",
+    "business", "webflow",
 ]
 
 DEFAULT_LANGUAGE_KEYWORDS = [
+    # Inglés
     "we are looking for", "we are seeking", "you will be", "you will have",
     "you will work", "you will join", "must have", "nice to have",
     "about the role", "about the job", "about the company", "about us",
@@ -116,149 +83,176 @@ DEFAULT_LANGUAGE_KEYWORDS = [
     "stiamo cercando", "cerchiamo", "si offre", "si richiede", "requisiti",
     "la risorsa", "il candidato", "inserimento",
     "esperienza in", "esperienza con", "conoscenza di", "ottima conoscenza",
-    "buona conoscenza", "si occuperà", "azienda leader", "offriamo", "chi siamo", "cosa farai"
+    "buona conoscenza", "si occuperà", "azienda leader", "offriamo", "chi siamo", "cosa farai",
 ]
+
 
 def load_keywords():
     """
     Carga las palabras clave desde el archivo JSON.
+
     Si el archivo no existe, lo crea con los valores por defecto.
-    Retorna un diccionario con las listas de positivas y negativas.
+    Si el archivo está corrupto o no es accesible, retorna los valores por defecto.
+
+    Returns:
+        dict: Diccionario con las claves 'search_keywords', 'negative_keywords'
+              y 'language_negative_keywords'.
     """
-    # Si el archivo no existe, lo creamos con los valores por defecto
     if not os.path.exists(KEYWORDS_FILE):
         default_data = {
             "search_keywords": DEFAULT_SEARCH_KEYWORDS,
+            "negative_keywords": DEFAULT_NEGATIVE_KEYWORDS,
             "language_negative_keywords": DEFAULT_LANGUAGE_KEYWORDS,
-            "negative_keywords": DEFAULT_NEGATIVE_KEYWORDS
         }
         save_keywords(default_data)
         return default_data
-    
+
     try:
-        # Intentamos leer el archivo existente
-        with open(KEYWORDS_FILE, "r", encoding="utf-8") as file_handler:
-            return json.load(file_handler)
+        with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
     except Exception as error:
-        print(f"Error cargando keywords: {error}")
-        # En caso de error (archivo corrupto), retornamos los defaults por seguridad
+        print(f"⚠️ Error cargando keywords: {error}. Usando valores por defecto.")
         return {
             "search_keywords": DEFAULT_SEARCH_KEYWORDS,
+            "negative_keywords": DEFAULT_NEGATIVE_KEYWORDS,
             "language_negative_keywords": DEFAULT_LANGUAGE_KEYWORDS,
-            "negative_keywords": DEFAULT_NEGATIVE_KEYWORDS
         }
+
 
 def save_keywords(keywords_data):
     """
-    Guarda el diccionario de palabras clave en el archivo JSON.
-    
+    Persiste el diccionario de palabras clave en el archivo JSON.
+
     Args:
-        keywords_data (dict): Diccionario con claves 'search_keywords' y 'negative_keywords'.
+        keywords_data (dict): Diccionario con las listas de palabras clave.
     """
-    with open(KEYWORDS_FILE, "w", encoding="utf-8") as file_handler:
-        # ensure_ascii=False permite guardar tildes y caracteres especiales correctamente
-        json.dump(keywords_data, file_handler, indent=4, ensure_ascii=False)
+    with open(KEYWORDS_FILE, "w", encoding="utf-8") as f:
+        json.dump(keywords_data, f, indent=4, ensure_ascii=False)
+
 
 def get_positive_keywords():
-    """Retorna la lista actual de palabras clave POSITIVAS."""
-    keywords_data = load_keywords()
-    return keywords_data.get("search_keywords", DEFAULT_SEARCH_KEYWORDS)
+    """Retorna la lista de palabras clave positivas (términos a buscar en títulos)."""
+    return load_keywords().get("search_keywords", DEFAULT_SEARCH_KEYWORDS)
+
 
 def get_negative_keywords():
-    """Retorna la lista actual de palabras clave NEGATIVAS."""
-    keywords_data = load_keywords()
-    return keywords_data.get("negative_keywords", DEFAULT_NEGATIVE_KEYWORDS)
+    """Retorna la lista de palabras clave negativas (términos que descartan una oferta)."""
+    return load_keywords().get("negative_keywords", DEFAULT_NEGATIVE_KEYWORDS)
+
 
 def get_language_keywords():
-    """Retorna la lista actual de palabras de FILTRO DE IDIOMA (descripción)."""
-    keywords_data = load_keywords()
-    return keywords_data.get("language_negative_keywords", DEFAULT_LANGUAGE_KEYWORDS)
+    """Retorna las frases del filtro de idioma aplicado a la descripción de la oferta."""
+    return load_keywords().get("language_negative_keywords", DEFAULT_LANGUAGE_KEYWORDS)
+
 
 def add_positive_keyword(new_word):
     """
-    Agrega una nueva palabra clave positiva.
-    Retorna True si se agregó, False si ya existía.
+    Agrega una palabra clave positiva.
+
+    Returns:
+        bool: True si se agregó, False si ya existía.
     """
     keywords_data = load_keywords()
     current_list = keywords_data.get("search_keywords", [])
-    
-    # Normalizamos a minúsculas y quitamos espacios extra
-    normalized_word = new_word.lower().strip()
-    
-    if normalized_word not in current_list:
-        current_list.append(normalized_word)
+    normalized = new_word.lower().strip()
+
+    if normalized not in current_list:
+        current_list.append(normalized)
         keywords_data["search_keywords"] = current_list
         save_keywords(keywords_data)
         return True
     return False
+
 
 def add_negative_keyword(new_word):
     """
-    Agrega una nueva palabra clave negativa.
-    Retorna True si se agregó, False si ya existía.
+    Agrega una palabra clave negativa.
+
+    Returns:
+        bool: True si se agregó, False si ya existía.
     """
     keywords_data = load_keywords()
     current_list = keywords_data.get("negative_keywords", [])
-    
-    normalized_word = new_word.lower().strip()
-    
-    if normalized_word not in current_list:
-        current_list.append(normalized_word)
+    normalized = new_word.lower().strip()
+
+    if normalized not in current_list:
+        current_list.append(normalized)
         keywords_data["negative_keywords"] = current_list
         save_keywords(keywords_data)
         return True
     return False
 
+
 def remove_positive_keyword(word_to_remove):
-    """Elimina una palabra clave positiva."""
+    """
+    Elimina una palabra clave positiva.
+
+    Returns:
+        bool: True si se eliminó, False si no existía.
+    """
     keywords_data = load_keywords()
     current_list = keywords_data.get("search_keywords", [])
-    
-    normalized_word = word_to_remove.lower().strip()
-    
-    if normalized_word in current_list:
-        current_list.remove(normalized_word)
+    normalized = word_to_remove.lower().strip()
+
+    if normalized in current_list:
+        current_list.remove(normalized)
         keywords_data["search_keywords"] = current_list
         save_keywords(keywords_data)
         return True
     return False
 
+
 def remove_negative_keyword(word_to_remove):
-    """Elimina una palabra clave negativa."""
+    """
+    Elimina una palabra clave negativa.
+
+    Returns:
+        bool: True si se eliminó, False si no existía.
+    """
     keywords_data = load_keywords()
     current_list = keywords_data.get("negative_keywords", [])
-    
-    normalized_word = word_to_remove.lower().strip()
-    
-    if normalized_word in current_list:
-        current_list.remove(normalized_word)
+    normalized = word_to_remove.lower().strip()
+
+    if normalized in current_list:
+        current_list.remove(normalized)
         keywords_data["negative_keywords"] = current_list
         save_keywords(keywords_data)
         return True
     return False
 
+
 def add_language_keyword(new_word):
     """
-    Agrega una nueva frase al filtro de idioma.
-    Retorna True si se agregó, False si ya existía.
+    Agrega una frase al filtro de idioma.
+
+    Returns:
+        bool: True si se agregó, False si ya existía.
     """
     keywords_data = load_keywords()
     current_list = keywords_data.get("language_negative_keywords", [])
-    normalized_word = new_word.lower().strip()
-    if normalized_word not in current_list:
-        current_list.append(normalized_word)
+    normalized = new_word.lower().strip()
+
+    if normalized not in current_list:
+        current_list.append(normalized)
         keywords_data["language_negative_keywords"] = current_list
         save_keywords(keywords_data)
         return True
     return False
 
+
 def remove_language_keyword(word_to_remove):
-    """Elimina una frase del filtro de idioma."""
+    """
+    Elimina una frase del filtro de idioma.
+
+    Returns:
+        bool: True si se eliminó, False si no existía.
+    """
     keywords_data = load_keywords()
     current_list = keywords_data.get("language_negative_keywords", [])
-    normalized_word = word_to_remove.lower().strip()
-    if normalized_word in current_list:
-        current_list.remove(normalized_word)
+    normalized = word_to_remove.lower().strip()
+
+    if normalized in current_list:
+        current_list.remove(normalized)
         keywords_data["language_negative_keywords"] = current_list
         save_keywords(keywords_data)
         return True

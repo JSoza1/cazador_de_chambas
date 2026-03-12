@@ -4,152 +4,129 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
+
 class TalentiaBot(BaseBot):
     """
-    Bot específico para el portal de empleos de UTN Talentia.
-    Hereda de BaseBot.
-    Maneja una SPA (Single Page Application) donde la paginación no cambia la URL.
+    Bot de búsqueda para UTN Talentia (utnba.talentia.com).
+
+    Talentia es una SPA construida con bubble.io, por lo que la paginación
+    se maneja via clicks en el botón "Siguiente" en lugar de cambios de URL.
+
+    Para cada oferta relevante, el bot navega al detalle abriendo una nueva
+    pestaña para extraer la URL canónica, que luego se usa para historial
+    y notificación.
     """
-    
+
     def login(self):
-        pass # No requiere autenticación
+        pass  # No requiere autenticación
 
     def search(self, _=None):
-        """
-        Escanea el portal de empleos de UTN Talentia.
-        URL: https://utnba.talentia.com/portal/offers
-        Maneja paginación dinámica haciendo click en 'Siguiente'.
-        """
         from src.config import SEARCH_KEYWORDS as RAW_SEARCH, NEGATIVE_KEYWORDS as RAW_NEG
-        
-        SEARCH_KEYWORDS = [k.lower() for k in RAW_SEARCH]
+
+        SEARCH_KEYWORDS   = [k.lower() for k in RAW_SEARCH]
         NEGATIVE_KEYWORDS = [k.lower() for k in RAW_NEG]
 
-        print(f"🔍 Iniciando escaneo en UTN Talentia...")
+        print("🔍 Iniciando escaneo en UTN Talentia...")
         self.notify("🤖 Buscando chamba por UTN Talentia!")
 
-        url = "https://utnba.talentia.com/portal/offers"
+        url       = "https://utnba.talentia.com/portal/offers"
         MAX_PAGES = 5
 
         self.driver.get(url)
-        self.random_sleep(5, 8) # Espera larga inicial para carga de la SPA
+        self.random_sleep(5, 8)  # Espera extendida para que la SPA termine de renderizar
 
         for page in range(1, MAX_PAGES + 1):
             print(f"\n   📄 Buscando por PÁGINA {page}")
 
-            # 1. Esperamos a que carguen las tarjetas
             try:
-                # Selector analizado: .clickable-element.bubble-element.Group.cmnsr (Contenedor Tarjeta)
-                # Usaremos una espera por presencia de elementos .clickable-element que contengan texto (títulos)
-                self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".bubble-element.Group.cmnsr")))
-                self.random_sleep(2, 3) 
-            except:
-                print(f"   ⚠️ No se detectaron tarjetas (o fin de carga).")
+                self.wait.until(EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, ".bubble-element.Group.cmnsr")
+                ))
+                self.random_sleep(2, 3)
+            except Exception:
+                print("   ⚠️ No se detectaron tarjetas (o fin de carga).")
                 break
 
-            # 2. Buscamos todas las tarjetas en el DOM actual
-            # OJO: Talentia es un "bubble.io" app, las clases son raras. 
-            # Buscaremos por estructura: Divs que parecen tarjetas.
-            # Mejor estrategia: Buscar los títulos directamente y subir al padre si es necesario, 
-            # o simplemente iterar los bloques de texto grandes.
-            
-            # Selector de tarjeta exacto según análisis:
-            cards = self.driver.find_elements(By.CSS_SELECTOR, ".clickable-element.bubble-element.Group.cmnsr")
-            
+            cards = self.driver.find_elements(
+                By.CSS_SELECTOR, ".clickable-element.bubble-element.Group.cmnsr"
+            )
+
             if not cards:
-                print(f"   ⚠️ No encontré tarjetas con el selector estándar.")
-                # Fallback: buscar por texto
-                cards = self.driver.find_elements(By.XPATH, "//div[contains(@class, 'bubble-element') and contains(@class, 'Group')][.//div[contains(text(), 'híbrido') or contains(text(), 'remoto') or contains(text(), 'presencial')]]")
+                # Selector alternativo para variaciones de la SPA
+                cards = self.driver.find_elements(
+                    By.XPATH,
+                    "//div[contains(@class, 'bubble-element') and contains(@class, 'Group')]"
+                    "[.//div[contains(text(), 'híbrido') or contains(text(), 'remoto') "
+                    "or contains(text(), 'presencial')]]"
+                )
 
             print(f"   -> Encontré {len(cards)} posibles ofertas...")
 
-            found_any = False
             for card in cards:
                 try:
-                    # 3. Extraer Título
-                    # El título está en un div interno: .bubble-element.Text.cmnsy
-                    # A veces las clases cambian dinámicamente en bubble.io.
-                    # Buscamos el elemento de texto que sea negrita o encabezado dentro de la tarjeta.
                     try:
-                        # Buscamos el div de texto principal
                         title_node = card.find_element(By.CSS_SELECTOR, ".bubble-element.Text.cmnsy")
                         title_text = title_node.text.strip()
-                    except:
-                        # Fallback: El primer texto grande
+                    except Exception:
                         title_text = card.text.split("\n")[0].strip()
 
-                    # Limpieza
                     if not title_text or len(title_text) < 3:
                         continue
 
-                    # 4. Validación
                     match_keyword = self.validate_job_title(title_text, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS)
 
                     if match_keyword:
-                        # Extraer URL real abriendo el detalle
-                        # Por defecto la genérica
+                        # Abrimos el detalle en una nueva pestaña para obtener la URL canónica.
                         url_oferta = "https://utnba.talentia.com/portal/offers"
-                        
+
                         try:
-                            # 1. Click en tarjeta para abrir Side Panel
                             print(f"         🔍 Extrayendo URL específica para '{title_text}'...")
-                            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", card)
+                            self.driver.execute_script(
+                                "arguments[0].scrollIntoView({block: 'center'});", card
+                            )
                             self.random_sleep(1, 2)
                             card.click()
                             self.random_sleep(2, 3)
-                            
-                            # 2. Buscar botón 'Ver pantalla completa'
-                            # Se abre un panel lateral. Buscamos el texto.
+
                             btn_full = self.wait.until(EC.element_to_be_clickable(
                                 (By.XPATH, "//div[contains(text(), 'Ver pantalla completa')]")
                             ))
-                            
-                            # 3. Abrir en nueva pestaña
+
                             curr_handles = self.driver.window_handles
                             btn_full.click()
-                            
-                            # Esperar nueva pestaña
-                            # Usamos un sleep simple o wait
-                            self.random_sleep(2, 3) 
+                            self.random_sleep(2, 3)
+
                             new_handles = self.driver.window_handles
-                            
+
                             if len(new_handles) > len(curr_handles):
                                 new_tab = [h for h in new_handles if h not in curr_handles][0]
                                 self.driver.switch_to.window(new_tab)
-                                # Esperar a que cargue URL
                                 self.random_sleep(1, 2)
                                 url_oferta = normalize_url(self.driver.current_url)
-                                
-                                # Cerrar y volver
                                 self.driver.close()
                                 self.driver.switch_to.window(curr_handles[0])
                                 print(f"         🔗 URL encontrada: {url_oferta}")
                             else:
                                 print("         ⚠️ No se abrió nueva pestaña.")
-                            
+
                         except Exception as e:
                             print(f"         ⚠️ No se pudo extraer URL real: {e}")
-                            # Recuperar foco si algo falló
                             try:
                                 self.driver.switch_to.window(self.driver.window_handles[0])
-                            except:
+                            except Exception:
                                 pass
 
-                        # 🛑 VERIFICAR DUPLICADOS (HISTORIAL)
-                        # Usamos la URL real si es específica, sino el título
-                        if "detalle_oferta" in url_oferta:
-                             track_id = url_oferta
-                        else:
-                             track_id = f"talentia://{title_text.replace(' ', '_')}"
+                        # Usamos la URL real si es de una oferta específica; sino,
+                        # construimos un ID único basado en el título.
+                        track_id = url_oferta if "detalle_oferta" in url_oferta \
+                            else f"talentia://{title_text.replace(' ', '_')}"
 
                         if not self.check_and_track(track_id):
                             continue
 
-                        found_any = True
                         print(f"         ✨ ¡MATCH! Coincide con '{match_keyword}'")
                         print(f"            🔗 Portal: {url_oferta}")
 
-                        # --- FILTRO DE IDIOMA ---
                         lang_blocked, lang_word = self.check_language_in_description(url_oferta)
                         if lang_blocked:
                             print(f"         🌐 ──────────────────────────────")
@@ -159,39 +136,34 @@ class TalentiaBot(BaseBot):
                             print(f"         🌐 ──────────────────────────────")
                             continue
 
-                        msg = (
+                        self.notify(
                             f"✨ <b>¡NUEVA OFERTA EN UTN TALENTIA!</b>\n\n"
                             f"📌 <b>Cargo:</b> {title_text}\n"
                             f"🔑 <b>Match:</b> {match_keyword}\n"
                             f"🔗 <a href='{url_oferta}'>Ir al Portal</a>"
                         )
-                        self.notify(msg)
 
-                except Exception as e:
+                except Exception:
                     continue
 
-            # 5. Paginación (Click en "Siguiente")
+            # Paginación: click en "Siguiente" para cargar el próximo lote de tarjetas
             if page < MAX_PAGES:
                 print("   -> Buscando botón 'Siguiente'...")
                 try:
-                    # Botón siguiente detectado como div con texto "Siguiente" dentro de un clickable
-                    # Usamos XPath por texto que es lo más seguro en apps tipo Bubble
-                    next_btn = self.driver.find_element(By.XPATH, "//div[contains(text(), 'Siguiente')]")
-                    
-                    # Verificamos si es clickeable (a veces se deshabilita u oculta)
+                    next_btn = self.driver.find_element(
+                        By.XPATH, "//div[contains(text(), 'Siguiente')]"
+                    )
+
                     if not next_btn.is_displayed():
                         print("   ⚠️ Botón Siguiente no visible. Fin.")
                         break
 
-                    # Scroll para asegurarnos que se vea
                     self.driver.execute_script("arguments[0].scrollIntoView(true);", next_btn)
                     self.random_sleep(1, 2)
-                    
-                    # Click
                     next_btn.click()
                     print("   -> Click realizado. Esperando carga...")
-                    self.random_sleep(4, 6) # Espera para que el SPA renderice las nuevas cartas
-                    
+                    self.random_sleep(4, 6)
+
                 except Exception as e:
                     print(f"   ⚠️ No se pudo avanzar de página: {e}")
                     break
