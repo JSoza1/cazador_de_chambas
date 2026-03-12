@@ -1,4 +1,5 @@
 from src.sites.base import BaseBot
+from src.history import normalize_url
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import time
@@ -117,7 +118,7 @@ class TalentiaBot(BaseBot):
                                 self.driver.switch_to.window(new_tab)
                                 # Esperar a que cargue URL
                                 self.random_sleep(1, 2)
-                                url_oferta = self.driver.current_url
+                                url_oferta = normalize_url(self.driver.current_url)
                                 
                                 # Cerrar y volver
                                 self.driver.close()

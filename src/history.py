@@ -1,10 +1,70 @@
 import json
 import os
 from datetime import datetime, timedelta
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
 # Definimos constantes para fácil configuración
 HISTORY_FILE = "seen_jobs.json" 
 DAYS_TO_REMEMBER = 15           
+
+# Parámetros de query string que son de sesión/tracking y deben ignorarse
+# al comparar URLs. Agregar aquí si aparecen nuevos sitios con el mismo problema.
+TRACKING_PARAMS = {
+    "searchId",   # EmpleosIT: cambia en cada sesión de búsqueda
+    "page",       # EmpleosIT: número de página de la búsqueda (no del recurso)
+    "s",          # Bumeran y otros: hash de sesión
+    "lc",         # Computrabajo: posición en la lista (redundante, ya cubierto por #fragment)
+    "utm_source", # Parámetros de marketing genéricos
+    "utm_medium",
+    "utm_campaign",
+    "utm_content",
+    "utm_term",
+}
+
+def normalize_url(url):
+    """
+    Normaliza una URL para comparación consistente entre búsquedas.
+    
+    Elimina:
+    - El fragmento (#...) → Computrabajo agrega '#lc=ListOffers-Score-N' que
+      varía según la posición en la lista pero apunta a la misma oferta.
+    - Parámetros de tracking/sesión definidos en TRACKING_PARAMS →
+      EmpleosIT agrega 'searchId' y 'page' que cambian en cada búsqueda.
+    - Espacios en blanco al inicio/fin.
+    
+    Args:
+        url (str): La URL a normalizar.
+        
+    Returns:
+        str: La URL normalizada (sin fragmento ni params de tracking).
+    """
+    if not url:
+        return url
+    try:
+        parsed = urlparse(url.strip())
+        
+        # Filtramos los query params: conservamos solo los que NO son de tracking
+        original_params = parse_qs(parsed.query, keep_blank_values=True)
+        clean_params = {
+            k: v for k, v in original_params.items()
+            if k.lower() not in TRACKING_PARAMS
+        }
+        
+        # Reconstruimos la query string limpia (sorted para orden consistente)
+        clean_query = urlencode(clean_params, doseq=True)
+        
+        # Reconstruimos la URL sin el fragmento y con query limpia
+        normalized = urlunparse((
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path,
+            parsed.params,
+            clean_query,
+            ""  # Sin fragmento (#...)
+        ))
+        return normalized
+    except Exception:
+        return url.strip()
 
 class JobHistory:
     """
@@ -65,14 +125,15 @@ class JobHistory:
             print(f"⚠️ No se pudo guardar el historial: {e}")
 
     def is_seen(self, url):
-        """Verifica si una URL ya existe en el registro."""
-        return url in self.seen_jobs
+        """Verifica si una URL (normalizada) ya existe en el registro."""
+        return normalize_url(url) in self.seen_jobs
 
     def add_job(self, url):
         """
-        Registra una URL con la fecha actual y guarda cambios.
+        Registra una URL (normalizada) con la fecha actual y guarda cambios.
         """
-        self.seen_jobs[url] = datetime.now().isoformat()
+        clean_url = normalize_url(url)
+        self.seen_jobs[clean_url] = datetime.now().isoformat()
         self.save()
 
 # Instancia global para usar en todo el proyecto

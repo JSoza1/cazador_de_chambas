@@ -1,4 +1,5 @@
 from src.sites.base import BaseBot
+from src.history import normalize_url
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -60,7 +61,7 @@ class AndreaniBot(BaseBot):
                 # 2. Extraer Link
                 # El link está en un <a> con clase 'job-list-item__link'
                 link_element = card.find_element(By.CLASS_NAME, "job-list-item__link")
-                url_oferta = link_element.get_attribute("href")
+                url_oferta = normalize_url(link_element.get_attribute("href"))
 
                 # Limpieza básica
                 if not title_text or len(title_text) < 3:

@@ -1,4 +1,5 @@
 from src.sites.base import BaseBot
+from src.history import normalize_url
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -63,7 +64,7 @@ class VicenteLopezBot(BaseBot):
                         try:
                             title_node = card.find_element(By.CSS_SELECTOR, "h4 a")
                             title_text = title_node.text.strip()
-                            url_oferta = title_node.get_attribute("href")
+                            url_oferta = normalize_url(title_node.get_attribute("href"))
                         except:
                             continue # Si falla la extracción básica, pasamos
 

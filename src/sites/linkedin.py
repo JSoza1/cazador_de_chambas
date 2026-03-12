@@ -7,7 +7,7 @@ import time
 from src.config import JOB_SEARCH_URLS, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS
 from src.listener import check_telegram_replies
 from src.keywords_manager import get_language_keywords
-from src.history import history
+from src.history import history, normalize_url
 
 class LinkedInBot(BaseBot):
     """
@@ -175,7 +175,7 @@ class LinkedInBot(BaseBot):
                             title_text = title_element.text.strip().lower()
                             title_text = title_text.replace("\n", " ").replace("solicitud sencilla", "")
                             
-                            link = title_element.get_attribute("href")
+                            link = normalize_url(title_element.get_attribute("href"))
                             
                             if len(title_text) < 3: continue
 

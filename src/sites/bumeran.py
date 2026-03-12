@@ -1,4 +1,5 @@
 from src.sites.base import BaseBot
+from src.history import normalize_url
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -60,7 +61,7 @@ class BumeranBot(BaseBot):
             for index, link_element in enumerate(job_links):
                 try:
                     # Recuperamos el link (por si se pierde la referencia, aunque raro)
-                    url_oferta = link_element.get_attribute("href")
+                    url_oferta = normalize_url(link_element.get_attribute("href"))
                     
                     # Intentamos sacar el título
                     title_text = ""

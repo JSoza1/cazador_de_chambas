@@ -1,4 +1,5 @@
 from src.sites.base import BaseBot
+from src.history import normalize_url
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -61,7 +62,7 @@ class EducacionITBot(BaseBot):
                         title_node = card.find_element(By.CSS_SELECTOR, "h3 a")
                         
                         title_text = title_node.text.strip()
-                        url_oferta = title_node.get_attribute("href")
+                        url_oferta = normalize_url(title_node.get_attribute("href"))
 
                         # Limpieza básica
                         if not title_text or len(title_text) < 3:

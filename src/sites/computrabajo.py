@@ -1,4 +1,5 @@
 from src.sites.base import BaseBot
+from src.history import normalize_url
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -71,7 +72,7 @@ class ComputrabajoBot(BaseBot):
                         try:
                             title_elem = art.find_element(By.TAG_NAME, "h2").find_element(By.TAG_NAME, "a")
                             title_text = title_elem.text
-                            link_url = title_elem.get_attribute("href")
+                            link_url = normalize_url(title_elem.get_attribute("href"))
                         except:
                            continue
 

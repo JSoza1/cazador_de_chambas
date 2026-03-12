@@ -5,7 +5,7 @@ import os
 import sys
 import json
 from src.config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
-from src.history import history
+from src.history import history, normalize_url
 from src.keywords_manager import (
     add_negative_keyword, 
     add_positive_keyword, 
@@ -334,24 +334,22 @@ def check_telegram_replies():
                     if entity["type"] == "text_link":
                         found_url = entity["url"]
                         break
-                    # Caso 2: URL explícita (ej: https://...)
-                    elif entity["type"] == "url":
-                        offset = entity["offset"]
-                        length = entity["length"]
-                        # Cortamos el texto exacto donde está la URL
-                        found_url = original_text[offset:offset+length]
-                        break
                 
-                # Método B: Búsqueda manual con Expresiones Regulares (Regex) si lo anterior falla
+                # Método B: Búsqueda con Regex (más robusta para URLs en texto plano).
+                # Se usa como método principal para URLs de tipo 'url' en entities,
+                # porque Telegram calcula offsets en UTF-16 pero Python usa Unicode,
+                # lo que puede descasar el índice cuando hay emojis (ej: '🔗' cuenta
+                # como 2 unidades en UTF-16 pero 1 en Python, corrompiendo la URL).
                 if not found_url:
-                    # Busca patrones http:// o https://
-                    urls_found = re.findall(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+[^\s]*', original_text)
+                    urls_found = re.findall(r'https?://[^\s<>"]+', original_text)
                     if urls_found:
-                        found_url = urls_found[0] 
+                        found_url = urls_found[0]
                 
                 # --- Guardado en Historial ---
                 if found_url:
-                    print(f"   📩 Usuario marcó oferta como vista: {found_url[:30]}...")
+                    # Normalizamos la URL antes de guardar (elimina #fragmentos, espacios)
+                    found_url = normalize_url(found_url)
+                    print(f"   📩 Usuario marcó oferta como vista: {found_url[:60]}...")
                     
                     # Verificamos si ya estaba en el historial para dar feedback adecuado
                     if history.is_seen(found_url):

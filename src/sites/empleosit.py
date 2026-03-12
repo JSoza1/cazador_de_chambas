@@ -1,4 +1,5 @@
 from src.sites.base import BaseBot
+from src.history import normalize_url
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import time
@@ -80,7 +81,7 @@ class EmpleosITBot(BaseBot):
                             continue
 
                         title_text = target_link.text.strip()
-                        url_oferta = target_link.get_attribute("href")
+                        url_oferta = normalize_url(target_link.get_attribute("href"))
 
                         # Validación
                         match_keyword = self.validate_job_title(title_text, SEARCH_KEYWORDS, NEGATIVE_KEYWORDS)
