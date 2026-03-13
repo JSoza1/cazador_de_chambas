@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import random
 from src.notifications import send_telegram_message
-from src.history import history
+from src.history import history, normalize_url
 
 
 class BaseBot(ABC):
@@ -132,20 +132,30 @@ class BaseBot(ABC):
 
     def check_and_track(self, url):
         """
-        Verifica si una oferta ya fue procesada en los últimos días.
+        Verifica si una oferta ya fue vista (historial permanente o sesión actual).
 
-        No registra la URL automáticamente; el usuario debe confirmar via Telegram
-        para que quede guardada en el historial.
+        Si la URL es nueva, la registra en el cache de sesión para evitar
+        notificaciones duplicadas dentro del mismo ciclo de búsqueda, sin
+        persistir nada a disco. El archivado permanente ocurre solo cuando
+        el usuario lo confirma via Telegram.
 
         Args:
             url (str): URL de la oferta a verificar.
 
         Returns:
-            bool: True si la oferta es nueva, False si ya fue vista.
+            bool: True si la oferta es nueva y debe notificarse, False si ya fue vista.
         """
         if not url:
             return True
-        return not history.is_seen(url)
+        clean_url = normalize_url(url)
+        if clean_url in history.seen_jobs:
+            print(f"         ⏭️  Ya archivada (historial): {clean_url[:70]}")
+            return False
+        if clean_url in history.session_seen:
+            print(f"         🔁  Ya notificada en este ciclo: {clean_url[:70]}")
+            return False
+        history.mark_notified(url)
+        return True
 
     def check_language_in_description(self, url):
         """

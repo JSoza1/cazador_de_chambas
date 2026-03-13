@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
@@ -26,21 +27,24 @@ def normalize_url(url):
     """
     Normaliza una URL antes de compararla o guardarla.
 
-    Distintos portales de empleo agregan parámetros a la URL de cada oferta
-    (sesión, posición en la lista, página de búsqueda, etc.) que cambian entre
-    ejecuciones pero apuntan al mismo recurso. Esta función los elimina para
-    garantizar que la misma oferta siempre produzca la misma clave canónica.
+    Distintos portales de empleo agregan parámetros o sufijos variables a las
+    URLs de sus ofertas que cambian entre búsquedas pero apuntan al mismo recurso.
+    Esta función los elimina para garantizar que la misma oferta siempre produzca
+    la misma clave canónica, independientemente de cómo se accedió a ella.
 
-    Elimina:
+    Normalizaciones aplicadas:
     - Fragmento (#...): ancla de página, no afecta al recurso.
     - Parámetros de tracking definidos en TRACKING_PARAMS.
     - Espacios en blanco al inicio/fin.
+    - Bumeran: elimina el ID numérico al final del slug de la oferta.
+      La misma oferta puede aparecer con IDs distintos en páginas de
+      resultados diferentes (ej: -aliantec-1118190158.html vs -aliantec-2177247.html).
 
     Args:
         url (str): URL a normalizar.
 
     Returns:
-        str: URL canónica sin fragmento ni parámetros de sesión/tracking.
+        str: URL canónica sin fragmento, tracking params ni IDs variables de listing.
     """
     if not url:
         return url
@@ -56,11 +60,19 @@ def normalize_url(url):
 
         clean_query = urlencode(clean_params, doseq=True)
 
+        path = parsed.path
+
+        # Bumeran agrega un ID numérico al final del slug de cada oferta que varía
+        # según la página de resultados donde aparece. Lo eliminamos para que la
+        # misma oferta siempre tenga la misma clave canónica.
+        if "bumeran.com.ar" in parsed.netloc and path.startswith("/empleos/"):
+            path = re.sub(r"-\d+(\.html)$", r"\1", path)
+
         # Reconstruimos la URL sin fragmento y con query string limpia
         normalized = urlunparse((
             parsed.scheme,
             parsed.netloc,
-            parsed.path,
+            path,
             parsed.params,
             clean_query,
             ""  # Sin fragmento
@@ -79,12 +91,18 @@ class JobHistory:
     comparaciones consistentes independientemente de los parámetros de sesión
     que cada portal pueda agregar.
 
+    Además del historial persistente, mantiene un set en memoria (`session_seen`)
+    con las URLs notificadas en el ciclo actual. Este set se reinicia con cada
+    arranque del bot, garantizando que una oferta no se notifique más de una vez
+    por ciclo aunque aparezca en varias páginas de resultados.
+
     Al iniciar, purga automáticamente los registros con más de DAYS_TO_REMEMBER
     días para evitar que el archivo crezca indefinidamente.
     """
 
     def __init__(self):
-        self.seen_jobs = {}
+        self.seen_jobs    = {}
+        self.session_seen = set()  # URLs notificadas en el ciclo actual (no persiste)
         self.load()
 
     def load(self):
@@ -141,11 +159,24 @@ class JobHistory:
             print(f"⚠️ No se pudo guardar el historial: {e}")
 
     def is_seen(self, url):
-        """Verifica si una URL ya existe en el historial (comparación normalizada)."""
-        return normalize_url(url) in self.seen_jobs
+        """
+        Verifica si una URL ya fue vista, consultando tanto el historial
+        persistente como el cache de sesión actual.
+        """
+        clean = normalize_url(url)
+        return clean in self.seen_jobs or clean in self.session_seen
+
+    def mark_notified(self, url):
+        """
+        Registra una URL como notificada en la sesión actual sin persistir a disco.
+
+        Impide que la misma oferta se notifique más de una vez por ciclo aunque
+        aparezca en varias páginas de resultados. El registro se pierde al reiniciar.
+        """
+        self.session_seen.add(normalize_url(url))
 
     def add_job(self, url):
-        """Registra una URL en el historial con la fecha actual y persiste el cambio."""
+        """Registra una URL en el historial permanente con la fecha actual y persiste el cambio."""
         clean_url = normalize_url(url)
         self.seen_jobs[clean_url] = datetime.now().isoformat()
         self.save()

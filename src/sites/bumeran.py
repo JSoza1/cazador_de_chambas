@@ -1,5 +1,4 @@
 from src.sites.base import BaseBot
-from src.history import normalize_url
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -59,7 +58,10 @@ class BumeranBot(BaseBot):
 
             for link_element in job_links:
                 try:
-                    url_oferta = normalize_url(link_element.get_attribute("href"))
+                    # Conservamos la URL original para que el link de la notificación
+                    # sea clickeable. La normalización ocurre internamente en
+                    # check_and_track e history.is_seen para deduplicación.
+                    url_oferta = link_element.get_attribute("href")
 
                     title_text = ""
                     try:
