@@ -1,7 +1,8 @@
 import time
 import sys
 
-from src.config import SEARCH_KEYWORDS, CHECK_INTERVAL_MINUTES
+from src.config import CHECK_INTERVAL_MINUTES
+from src.keywords_manager import get_positive_keywords, get_negative_keywords, get_language_keywords
 from src.driver import get_driver
 from src.notifications import send_telegram_message
 from src.sites.bumeran import BumeranBot
@@ -21,11 +22,21 @@ def main():
     Durante la espera, el bot sigue escuchando respuestas de Telegram
     cada 60 segundos para procesar archivados de ofertas en tiempo real.
     """
-    print("========================================")
-    print("🤖 JOB SEARCH AUTOMATION - INICIADO")
-    print(f"📋 Keywords (Búsqueda): {SEARCH_KEYWORDS}")
-    print(f"⏲️ Intervalo de Espera: {CHECK_INTERVAL_MINUTES} minutos")
-    print("========================================")
+    pos_list = get_positive_keywords()
+    neg_list = get_negative_keywords()
+    lan_list = get_language_keywords()
+
+    print("====================================================")
+    print("🤖 CAZADOR DE CHAMBAS - SISTEMA INICIADO")
+    print("====================================================")
+    print(f"✅ Palabras Positivas ({len(pos_list)}):")
+    print(f"   {', '.join(sorted(pos_list))}")
+    print(f"\n🚫 Palabras Negativas ({len(neg_list)}):")
+    print(f"   {', '.join(sorted(neg_list))}")
+    print(f"\n🌐 Filtros de Idioma ({len(lan_list)} frases activas):")
+    print(f"   {', '.join(sorted(lan_list))}")
+    print(f"\n⏲️  Intervalo de Espera: {CHECK_INTERVAL_MINUTES} minutos")
+    print("====================================================")
 
     try:
         while True:

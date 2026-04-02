@@ -65,12 +65,15 @@ JOB_SEARCH_URLS = [
     "https://www.linkedin.com/jobs/search/?currentJobId=4359080675&f_AL=true&f_TPR=r604800&f_WT=2&geoId=92000000&keywords=Programador&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true&sortBy=DD",
 ]
 
-from src.keywords_manager import get_positive_keywords, get_negative_keywords
 
-# Palabras clave cargadas dinámicamente desde keywords.json.
-# Se gestionan en tiempo de ejecución via Telegram sin necesidad de reiniciar el bot.
-SEARCH_KEYWORDS   = get_positive_keywords()
-NEGATIVE_KEYWORDS = get_negative_keywords()
+# Resolución dinámica de palabras clave para que siempre estén al día sin reiniciar.
+def __getattr__(name):
+    from src.keywords_manager import get_positive_keywords, get_negative_keywords
+    if name == "SEARCH_KEYWORDS":
+        return get_positive_keywords()
+    if name == "NEGATIVE_KEYWORDS":
+        return get_negative_keywords()
+    raise AttributeError(f"module {__name__} has no attribute {name}")
 
 # --- CONFIGURACIÓN TÉCNICA ---
 

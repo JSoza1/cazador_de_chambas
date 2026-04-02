@@ -21,7 +21,7 @@ class AndreaniBot(BaseBot):
         SEARCH_KEYWORDS   = [k.lower() for k in RAW_SEARCH]
         NEGATIVE_KEYWORDS = [k.lower() for k in RAW_NEG]
 
-        print(f"🔍 Iniciando escaneo en Andreani (keywords: {SEARCH_KEYWORDS})")
+        print(f"🔍 Escaneando Andreani...")
         self.notify("🤖 Buscando chamba por Andreani!")
 
         target_url = "https://ibmzjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/es/sites/CX_1001/jobs"

@@ -147,15 +147,35 @@ Para que el bot te avise al celular, necesitas dos datos sencillos:
 
 ---
 
-## 🛠️ Instalación en PC (Windows/Linux)
+## 🛠️ Instalación y Configuración
+
+Se recomienda encarecidamente usar un entorno virtual para evitar conflictos de dependencias con otros proyectos.
 
 ### 1. Prerrequisitos
-Se requiere tener instalado **Python** y **Google Chrome**.
+*   **Python 3.10+** instalado.
+*   **Google Chrome** (en PC) o **Chromium** (en Termux).
 
-### 2. Pasos
-1.  Clonar el repositorio.
-2.  Instalar dependencias: `pip install -r requirements.txt`
-3.  Crear `.env` basándose en `.env.example` (Solo requiere configurar Telegram).
+### 2. Configuración en PC (Windows/Linux)
+1.  **Clonar el repositorio**: `git clone https://github.com/Jsoza1/cazador_de_chambas.git`
+2.  **Crear Entorno Virtual**:
+    *   Windows: `python -m venv venv`
+    *   Linux: `python3 -m venv venv`
+3.  **Instalar Dependencias**:
+    *   Windows: `.\venv\Scripts\pip install -r requirements.txt`
+    *   Linux: `./venv/bin/pip install -r requirements.txt`
+4.  **Configurar Secretos**: Copiar `.env.example` a `.env` y completar los datos de Telegram.
+
+### 3. Cómo Ejecutar
+*   **Windows**: Simplemente haz doble clic en `run_bot.bat`. Este archivo activa el entorno y lanza el bot automáticamente.
+*   **Linux / Android (Termux)**:
+    ```bash
+    # Ejecutar con el script de conveniencia
+    bash run.sh
+
+    # O bien manualmente (activar y correr)
+    source venv/bin/activate
+    python main.py
+    ```
 
 ---
 
@@ -189,8 +209,9 @@ pkg install chromium-browser -y
 git clone https://github.com/Jsoza1/cazador_de_chambas.git
 cd cazador_de_chambas
 
-# Instalar librerías Python
-pip install -r requirements.txt
+# Crear entorno virtual e instalar librerías
+python -m venv venv
+./venv/bin/pip install -r requirements.txt
 
 # Configurar Secretos (Manual)
 cp .env.example .env
@@ -200,7 +221,7 @@ nano .env
 
 ### 3. Ejecutar
 ```bash
-python main.py
+./venv/bin/python main.py
 ```
 El bot detectará automáticamente que está en Android y usará la configuración especial.
 

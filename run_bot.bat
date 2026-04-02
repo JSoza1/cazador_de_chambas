@@ -1,0 +1,6 @@
+@echo off
+echo Activando entorno virtual...
+call .\venv\Scripts\activate
+echo Iniciando Cazador de Chambas...
+python main.py
+pause

@@ -39,6 +39,16 @@ DEFAULT_SEARCH_KEYWORDS = [
     "SEO",
     "elementor",
     "2026",
+    "java",
+    "sql",
+    "administrativo jr",
+    "administrativo",
+    "analista de sistemas",
+    "analista de sistemas jr",
+    "analista",
+    "pagos",
+    "cobranzas",
+    "cuentas"
 ]
 
 DEFAULT_NEGATIVE_KEYWORDS = [
@@ -52,9 +62,9 @@ DEFAULT_NEGATIVE_KEYWORDS = [
     "php", "laravel", "django",
     "sap", "sap abap", "abap",
     "cloud", "aws", "azure", "google cloud", "google-cloud",
-    "java", "data science", "data",
+    "data science", "data",
     "ux/ui", "ux ui", "ux", "ui",
-    "pruebas", "pl", "sql", "native",
+    "pruebas", "pl", "native",
     "lider", "líder",
     "next.js", "next",
     "business", "webflow",
@@ -131,18 +141,25 @@ def save_keywords(keywords_data):
 
 
 def get_positive_keywords():
-    """Retorna la lista de palabras clave positivas (términos a buscar en títulos)."""
-    return load_keywords().get("search_keywords", DEFAULT_SEARCH_KEYWORDS)
+    """Retorna la unión de las palabras por defecto y las configuradas por el usuario en el JSON."""
+    user_keywords = load_keywords().get("search_keywords", [])
+    # Unimos ambos, normalizamos a minúsculas y eliminamos duplicados
+    combined = list(set([k.lower() for k in DEFAULT_SEARCH_KEYWORDS] + [k.lower() for k in user_keywords]))
+    return combined
 
 
 def get_negative_keywords():
-    """Retorna la lista de palabras clave negativas (términos que descartan una oferta)."""
-    return load_keywords().get("negative_keywords", DEFAULT_NEGATIVE_KEYWORDS)
+    """Retorna la unión de las negativas por defecto y las configuradas por el usuario."""
+    user_keywords = load_keywords().get("negative_keywords", [])
+    combined = list(set([k.lower() for k in DEFAULT_NEGATIVE_KEYWORDS] + [k.lower() for k in user_keywords]))
+    return combined
 
 
 def get_language_keywords():
-    """Retorna las frases del filtro de idioma aplicado a la descripción de la oferta."""
-    return load_keywords().get("language_negative_keywords", DEFAULT_LANGUAGE_KEYWORDS)
+    """Retorna la unión de las frases de idioma por defecto y las configuradas por el usuario."""
+    user_keywords = load_keywords().get("language_negative_keywords", [])
+    combined = list(set([k.lower() for k in DEFAULT_LANGUAGE_KEYWORDS] + [k.lower() for k in user_keywords]))
+    return combined
 
 
 def add_positive_keyword(new_word):

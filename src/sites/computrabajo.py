@@ -21,12 +21,14 @@ class ComputrabajoBot(BaseBot):
         SEARCH_KEYWORDS   = [k.lower() for k in RAW_SEARCH]
         NEGATIVE_KEYWORDS = [k.lower() for k in RAW_NEG]
 
-        print(f"🔍 COMPUTRABAJO: Iniciando búsqueda... {SEARCH_KEYWORDS}")
+        print(f"🔍 COMPUTRABAJO: Iniciando búsqueda...")
         self.notify("🤖 Buscando chamba por Computrabajo!")
 
         ZONES_URLS = [
             "https://ar.computrabajo.com/empleos-de-informatica-y-telecom-en-capital-federal?pubdate=7&by=publicationtime",
             "https://ar.computrabajo.com/empleos-de-informatica-y-telecom-en-buenos-aires-gba?pubdate=7&by=publicationtime",
+            "https://ar.computrabajo.com/empleos-de-administracion-y-oficina-en-capital-federal?pubdate=7&by=publicationtime",
+            "https://ar.computrabajo.com/empleos-de-administracion-y-oficina-en-buenos-aires-gba?pubdate=7&by=publicationtime",
         ]
 
         MAX_PAGES = 8
