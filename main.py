@@ -101,8 +101,9 @@ def gestionar_venv():
             instalar_dependencias(python_venv)
         
         print("[RELANZANDO] Cazador desde el entorno virtual...\n")
-        exit_code = subprocess.call([python_venv, os.path.abspath(__file__)])
-        sys.exit(exit_code)
+        # Usamos os.execv para que el nuevo proceso de Python REEMPLACE al actual. 
+        # Esto mantiene el mismo PID para la compatibilidad con Jarvis y evita dejar ramas huérfanas en Termux.
+        os.execv(python_venv, [python_venv, os.path.abspath(__file__)])
 
 
 # ============================================================================
