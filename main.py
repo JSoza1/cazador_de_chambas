@@ -53,10 +53,10 @@ def main():
                 BumeranBot(driver).search()
                 check_telegram_replies()
 
-                # --- COMPUTRABAJO ---
-                print("\n🚀 PROCESANDO: COMPUTRABAJO")
-                ComputrabajoBot(driver).search()
-                check_telegram_replies()
+                # # --- COMPUTRABAJO ---
+                # print("\n🚀 PROCESANDO: COMPUTRABAJO")
+                # ComputrabajoBot(driver).search()
+                # check_telegram_replies()
 
                 # --- ANDREANI ---
                 print("\n🚀 PROCESANDO: ANDREANI")
