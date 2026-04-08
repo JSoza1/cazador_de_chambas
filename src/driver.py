@@ -76,6 +76,12 @@ def get_driver():
             chrome_path = shutil.which("chromium") or shutil.which("chromium-browser") or f"{termux_bin}/chromium"
             driver_path = shutil.which("chromedriver") or f"{termux_bin}/chromedriver"
             
+            # Chequeo extra por si está en la carpeta lib
+            if not os.path.exists(driver_path):
+                alt_driver_path = "/data/data/com.termux/files/usr/lib/chromium/chromedriver"
+                if os.path.exists(alt_driver_path):
+                    driver_path = alt_driver_path
+            
             if not os.path.exists(driver_path):
                 print(f"⚠️ Alerta: No se encontró chromedriver en {driver_path}")
             else:

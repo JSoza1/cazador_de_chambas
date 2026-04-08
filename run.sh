@@ -12,24 +12,21 @@ if [ -d "/data/data/com.termux/files/usr/bin" ]; then
     echo "🔄 Actualizando repositorios base..."
     pkg update -y
     
-    # 2. Instalar tur-repo y REFRESCAR
-    if ! pkg list-installed tur-repo &> /dev/null; then
-        echo "🔧 Instalando tur-repo..."
-        pkg install tur-repo -y
-        pkg update -y # Crucial: actualizar para ver los nuevos paquetes del TUR
-    fi
+    # 2. Instalar repositorios necesarios (tur-repo y x11-repo)
+    echo "🔧 Agregando repositorio X11 y TUR..."
+    pkg install tur-repo x11-repo -y
+    pkg update -y
 
-    # 3. Instalar Chromium (Por separado para que no falle el resto)
+    # 3. Arreglar paquetes rotos (si los hay)
+    apt-get --fix-broken install -y
+    
+    # 4. Instalar Chromium (Chromedriver viene incluido en este paquete!)
     echo "🔧 Instalando Chromium..."
     pkg install chromium -y
 
-    # 4. Intentar instalar Chromedriver (Varios nombres posibles)
-    echo "🔧 Intentar instalar Chromedriver..."
-    pkg install chromedriver -y || pkg install chromium-chromedriver -y
-
     # 5. Debug Final: Localización real
-    CHROME_BIN=$(command -v chromium || command -v chromium-browser)
-    DRIVER_BIN=$(command -v chromedriver || find /data/data/com.termux/files/usr/bin -name "*chromedriver*" | head -n 1)
+    CHROME_BIN=$(command -v chromium || command -v chromium-browser || find /data/data/com.termux/files/usr/bin -name "*chromium*" | head -n 1)
+    DRIVER_BIN=$(command -v chromedriver || find /data/data/com.termux/files/usr -name "*chromedriver*" | head -n 1)
 
     echo "✅ Chrome encontrado en: $CHROME_BIN"
     echo "✅ Driver encontrado en: $DRIVER_BIN"
