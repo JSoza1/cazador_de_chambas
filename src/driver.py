@@ -66,8 +66,17 @@ def get_driver():
         if is_android:
             print("📱 Detectado entorno Android (Termux)")
             from selenium.webdriver.chrome.service import Service
-            chrome_options.binary_location = "/data/data/com.termux/files/usr/bin/chromium-browser"
-            service = Service("/data/data/com.termux/files/usr/bin/chromedriver")
+            import shutil
+            
+            # Intentar encontrar los binarios automáticamente
+            chrome_path = shutil.which("chromium") or shutil.which("chromium-browser") or "/data/data/com.termux/files/usr/bin/chromium"
+            driver_path = shutil.which("chromedriver") or "/data/data/com.termux/files/usr/bin/chromedriver"
+            
+            print(f"🔍 Usando Chromium en: {chrome_path}")
+            print(f"🔍 Usando Chromedriver en: {driver_path}")
+            
+            chrome_options.binary_location = chrome_path
+            service = Service(driver_path)
             driver = webdriver.Chrome(service=service, options=chrome_options)
         else:
             print("💻 Detectado entorno PC (Windows/Linux/Mac)")
