@@ -169,12 +169,10 @@ Se recomienda encarecidamente usar un entorno virtual para evitar conflictos de 
 *   **Windows**: Simplemente haz doble clic en `run_bot.bat`. Este archivo activa el entorno y lanza el bot automáticamente.
 *   **Linux / Android (Termux)**:
     ```bash
-    # Ejecutar con el script de conveniencia
-    bash run.sh
-
-    # O bien manualmente (activar y correr)
-    source venv/bin/activate
-    python main.py
+    # Dar permisos de ejecución (sólo la primera vez)
+    chmod +x run.sh
+    # Ejecutar con el script auto-instalador
+    ./run.sh
     ```
 
 ---
@@ -184,46 +182,31 @@ Se recomienda encarecidamente usar un entorno virtual para evitar conflictos de 
 Guía paso a paso para convertir un celular en un servidor de búsqueda.
 
 ### 1. Preparación de Termux
-Descargar Termux desde **F-Droid** (no Play Store). Ejecutar los siguientes comandos:
+Descargar Termux desde **F-Droid** (no Play Store). Ejecutar los siguientes comandos básicos:
 
 ```bash
-# Actualizar sistema
+# Actualizar sistema e instalar herramientas base
 pkg update -y && pkg upgrade -y
-
-# Instalar herramientas básicas
 pkg install python git nano -y
-
-# Habilitar repositorio de terceros (Necesario para Chromium headless)
-pkg install tur-repo -y
-
-# Instalar dependencias gráficas (Evita errores de gtk3)
-pkg install x11-repo -y
-
-# Instalar Chromium
-pkg install chromium-browser -y
 ```
 
-### 2. Configuración del Proyecto
+### 2. Configurar y Arrancar
 ```bash
 # Clonar repositorio
 git clone https://github.com/Jsoza1/cazador_de_chambas.git
 cd cazador_de_chambas
 
-# Crear entorno virtual e instalar librerías
-python -m venv venv
-./venv/bin/pip install -r requirements.txt
-
 # Configurar Secretos (Manual)
 cp .env.example .env
 nano .env
 # (Aquí debes borrar los ejemplos y escribir tus claves reales. Ctrl+O para guardar, Ctrl+X para salir)
+
+# Ejecutar script auto-instalador
+chmod +x run.sh
+./run.sh
 ```
 
-### 3. Ejecutar
-```bash
-./venv/bin/python main.py
-```
-El bot detectará automáticamente que está en Android y usará la configuración especial.
+El script `./run.sh` es inteligente: detectará que estás en Android, configurará repositorios necesarios (`tur-repo`, `x11-repo`), resolverá dependencias gráficas de Chromium, creará el entorno virtual y encenderá el bot automáticamente.
 
 ### 🔋 Tips para que NO se duerma Termux (Importante)
 Android mata los procesos en segundo plano para ahorrar batería. Para evitar que el bot se apague a las pocas horas:
