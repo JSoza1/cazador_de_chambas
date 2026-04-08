@@ -68,15 +68,31 @@ def get_driver():
             from selenium.webdriver.chrome.service import Service
             import shutil
             
-            # Intentar encontrar los binarios automáticamente
-            chrome_path = shutil.which("chromium") or shutil.which("chromium-browser") or "/data/data/com.termux/files/usr/bin/chromium"
-            driver_path = shutil.which("chromedriver") or "/data/data/com.termux/files/usr/bin/chromedriver"
+            # Forzar el PATH para que el sistema encuentre todo
+            termux_bin = "/data/data/com.termux/files/usr/bin"
+            os.environ["PATH"] = f"{termux_bin}:{os.environ.get('PATH', '')}"
             
+            # Buscar binarios
+            chrome_path = shutil.which("chromium") or shutil.which("chromium-browser") or f"{termux_bin}/chromium"
+            driver_path = shutil.which("chromedriver") or f"{termux_bin}/chromedriver"
+            
+            if not os.path.exists(driver_path):
+                print(f"⚠️ Alerta: No se encontró chromedriver en {driver_path}")
+            else:
+                # Asegurar permisos de ejecución
+                os.chmod(driver_path, 0o755)
+                if os.path.exists(chrome_path):
+                    os.chmod(chrome_path, 0o755)
+
             print(f"🔍 Usando Chromium en: {chrome_path}")
             print(f"🔍 Usando Chromedriver en: {driver_path}")
             
             chrome_options.binary_location = chrome_path
-            service = Service(driver_path)
+            
+            # Crear servicio y FORZAR la ruta para evitar que Selenium busque
+            service = Service(executable_path=driver_path)
+            service.path = driver_path 
+            
             driver = webdriver.Chrome(service=service, options=chrome_options)
         else:
             print("💻 Detectado entorno PC (Windows/Linux/Mac)")
