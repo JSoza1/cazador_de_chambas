@@ -4,8 +4,5 @@ __pycache__/
 .DS_Store
 geckodriver.log
 chromedriver.log
-seen_jobs.json
-last_update.json
-keywords.json
 profile/
 venv/

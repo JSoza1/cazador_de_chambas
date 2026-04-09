@@ -1,0 +1,53 @@
+name: Cazador de Chambas
+
+on:
+  schedule:
+    # Se ejecuta en el minuto 0 cada 4 horas. (Horario UTC)
+    - cron: '0 */4 * * *'
+  # Botón manual para probar el bot.
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Bajar mi código
+        # Importante: Checkout permite al bot leer y modificar los archivos de tu repositorio.
+        uses: actions/checkout@v4
+
+      - name: Instalar Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip' 
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ejecutar el buscador de empleos (Cazador)
+        # Aquí pasamos los secretos que debes crear en Settings > Secrets de este repo en GitHub
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python main.py
+
+      - name: Guardar memoria en GitHub (Self-Commit)
+        # Esto hace Add de los archivos JSON si sufrieron alguna modificación,
+        # crea un Commit y hace Push para actualizar el repo y conservar la memoria de cara al próximo ciclo.
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          
+          # Agregamos los json que guardan el historial y la ultima actualizacion.
+          git add seen_jobs.json last_update.json keywords.json || true
+          
+          # Commit. El "|| echo" es necesario por si el bot corrió pero no encontró nada nuevo.
+          # En ese caso no habrá cambios en los archivos y el commit daría error frenando el workflow. 
+          git commit -m "🤖 Memoria Actualizada: Se guardó el progreso de Cazador." || echo "No hubo cambios para guardar."
+          
+          # Push a la rama principal
+          git push

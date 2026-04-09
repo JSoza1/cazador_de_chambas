@@ -8,7 +8,6 @@ El objetivo de este código no es solo funcional, sino **educativo**. Está docu
 
 ## 🚀 Características
 
-*   **Soporte LinkedIn Avanzado**: Incluye un bot robusto para LinkedIn con manejo de perfiles persistentes (cookies) y scroll inteligente para evadir bloqueos.
 *   **Multi-Sitio & Extensible**: Compatible nativamente con Bumeran, Computrabajo, Andreani, EducaciónIT, BBVA, Vicente López, UTN Talentia y EmpleosIT. Gracias a su arquitectura modular, agregar nuevas bolsas de trabajo es una tarea sencilla.
 *   **Notificaciones en Tiempo Real**: Envía alertas a **Telegram** cada vez que encuentra una oferta interesante.
 *   **Control Interactivo**: Si respondes a una notificación en Telegram con **"ya lo vi"**, **"listo"**, **"este no"**, **"ya esta"** o **"paso"**, el bot dejará de mostrarte esa oferta por 15 días.
@@ -44,7 +43,7 @@ cazador_de_chambas/
 ├── keywords.json          # 💾 MEMORIA: Palabras clave y filtros de idioma (auto-generado).
 ├── last_update.json       # 📡 TELEGRAM: Control de mensajes leídos (auto-generado).
 ├── requirements.txt       # 📦 DEPENDENCIA: Lista de librerías necesarias.
-├── profile/               # 👤 COOKIES: Carpeta del perfil de Chrome (guarda sesión de LinkedIn).
+├── profile/               # 👤 COOKIES: Carpeta del perfil de Chrome para guardar sesiones.
 └── src/                   # ⚙️ CÓDIGO FUENTE
     ├── config.py          # ⚙️ CONFIGURACIÓN: Carga variables y keywords.
     ├── history.py         # 🧠 MEMORIA: Lógica de persistencia de ofertas.
@@ -54,7 +53,7 @@ cazador_de_chambas/
     ├── driver.py          # 🚗 MOTOR: Maneja el navegador (Chrome) y modos Headless.
     └── sites/             # 🌐 SITIOS: Aquí vive la lógica de cada página web.
         ├── base.py        # 📋 PLANTILLA: Define reglas comunes (filtrado, notificar, filtro de idioma).
-        ├── linkedin.py    # 🆕 LINKEDIN: Bot especializado con scroll y cookies persistentes.
+
         ├── andreani.py    # 👷 BOT: Implementación para Andreani.
         ├── bbva.py        # 👷 BOT: Implementación para BBVA.
         ├── bumeran.py     # 👷 BOT: Implementación para Bumeran.
@@ -147,73 +146,38 @@ Para que el bot te avise al celular, necesitas dos datos sencillos:
 
 ---
 
-## 🛠️ Instalación y Configuración
+## ☁️ Instalación en la Nube (GitHub Actions) - RECOMENDADO
 
-Se recomienda encarecidamente usar un entorno virtual para evitar conflictos de dependencias con otros proyectos.
+La forma más eficiente y desatendida de correr este bot es configurarlo para que se ejecute automáticamente cada 4 horas usando los servidores gratuitos de Github, sin gastar la batería de tu celular o PC.
 
-### 1. Prerrequisitos
-*   **Python 3.10+** instalado.
-*   **Google Chrome** (en PC) o **Chromium** (en Termux).
+1.  **Sube este código a tu propio repositorio** (se recomienda que sea Privado).
+2.  En GitHub, entra a tu repositorio y ve a **Settings > Secrets and variables > Actions**.
+3.  Crea un "New repository secret" llamado `TELEGRAM_BOT_TOKEN` y pega ahí el token de tu bot.
+4.  Crea un segundo secreto llamado `TELEGRAM_CHAT_ID` y pega tu ID de usuario.
+5.  ¡Listo! GitHub detectará automáticamente el archivo `.github/workflows/cazador.yml` y comenzará a correr el script según el cronograma.
+    *   Podrás ver el proceso en vivo en la pestaña **Actions**.
+    *   El bot es 100% amnésico en la nube, pero hemos diseñado una función de "Self-Commit" que hace que el propio bot sobreescriba su `seen_jobs.json` y `keywords.json` de vuelta hacia el repositorio al terminar cada ciclo, garantizando que conserve su "memoria".
 
-### 2. Configuración en PC (Windows/Linux)
-1.  **Clonar el repositorio**: `git clone https://github.com/Jsoza1/cazador_de_chambas.git`
-2.  **Crear Entorno Virtual**:
-    *   Windows: `python -m venv venv`
-    *   Linux: `python3 -m venv venv`
-3.  **Instalar Dependencias**:
-    *   Windows: `.\venv\Scripts\pip install -r requirements.txt`
-    *   Linux: `./venv/bin/pip install -r requirements.txt`
-4.  **Configurar Secretos**: Copiar `.env.example` a `.env` y completar los datos de Telegram.
+---
 
-### 3. Cómo Ejecutar
-*   **Windows**: Simplemente haz doble clic en `run_bot.bat`. Este archivo activa el entorno y lanza el bot automáticamente.
-*   **Linux / Android (Termux)**:
+## 🛠️ Ejecución Local (PC / Servidor Propio)
+
+Si prefieres ejecutar el bot en tu propia máquina o usar Termux en Android para pruebas:
+
+### 1. Preparación
+1.  **Clonar el código**: `git clone https://github.com/Jsoza1/cazador_de_chambas.git` y entra a la carpeta.
+2.  **Configurar variables**: Copia el archivo `.env.example`, renómbralo a `.env` y rellena tus datos de Telegram.
+
+### 2. Ejecutar
+El código incluye scripts "inteligentes" que crean automáticamente los entornos virtuales e instalan las dependencias.
+*   **En Windows**: Haz doble clic en `run_bot.bat`.
+*   **En Linux o Android (Termux)**:  
     ```bash
-    # Dar permisos de ejecución (sólo la primera vez)
     chmod +x run.sh
-    # Ejecutar con el script auto-instalador
     ./run.sh
     ```
+*(En Termux, recuerda activar el wakelock de Android y quitar las restricciones de batería si planeas dejarlo todo el día).*
 
 ---
 
-## 📱 Instalación en Android (Termux)
-
-Guía paso a paso para convertir un celular en un servidor de búsqueda.
-
-### 1. Preparación de Termux
-Descargar Termux desde **F-Droid** (no Play Store). Ejecutar los siguientes comandos básicos:
-
-```bash
-# Actualizar sistema e instalar herramientas base
-pkg update -y && pkg upgrade -y
-pkg install python git nano -y
-```
-
-### 2. Configurar y Arrancar
-```bash
-# Clonar repositorio
-git clone https://github.com/Jsoza1/cazador_de_chambas.git
-cd cazador_de_chambas
-
-# Configurar Secretos (Manual)
-cp .env.example .env
-nano .env
-# (Aquí debes borrar los ejemplos y escribir tus claves reales. Ctrl+O para guardar, Ctrl+X para salir)
-
-# Ejecutar script auto-instalador
-chmod +x run.sh
-./run.sh
-```
-
-El script `./run.sh` es inteligente: detectará que estás en Android, configurará repositorios necesarios (`tur-repo`, `x11-repo`), resolverá dependencias gráficas de Chromium, creará el entorno virtual y encenderá el bot automáticamente.
-
-### 🔋 Tips para que NO se duerma Termux (Importante)
-Android mata los procesos en segundo plano para ahorrar batería. Para evitar que el bot se apague a las pocas horas:
-
-1.  **Activar Wakelock:** Baja la barra de notificaciones de Android, busca la de Termux, expándela y pulsa **"Acquire wakelock"**.
-2.  **Quitar Restricciones:** Ve a *Ajustes > Batería > Optimización de batería*, busca **Termux** y selecciona **"No optimizar"** o "Sin restricciones".
-
----
-
-Hecho por **Jsoza**
+Realizado por **JSoza**

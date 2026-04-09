@@ -143,90 +143,74 @@ if __name__ == "__main__":
         print("====================================================")
 
         try:
-            while True:
-                from src.listener import check_telegram_replies
+            from src.listener import check_telegram_replies
 
-                # Procesamos respuestas pendientes de Telegram antes de iniciar
+            # Procesamos respuestas pendientes de Telegram antes de iniciar
+            check_telegram_replies()
+
+            driver = get_driver()
+
+            try:
+                # --- BUMERAN ---
+                print("\n🚀 PROCESANDO: BUMERAN")
+                BumeranBot(driver).search()
                 check_telegram_replies()
 
-                driver = get_driver()
+                # --- COMPUTRABAJO ---
+                print("\n🚀 PROCESANDO: COMPUTRABAJO")
+                ComputrabajoBot(driver).search()
+                check_telegram_replies()
 
-                try:
-                    # --- BUMERAN ---
-                    print("\n🚀 PROCESANDO: BUMERAN")
-                    BumeranBot(driver).search()
-                    check_telegram_replies()
+                # --- ANDREANI ---
+                print("\n🚀 PROCESANDO: ANDREANI")
+                from src.sites.andreani import AndreaniBot
+                AndreaniBot(driver).search()
+                check_telegram_replies()
 
-                    # --- COMPUTRABAJO ---
-                    print("\n🚀 PROCESANDO: COMPUTRABAJO")
-                    ComputrabajoBot(driver).search()
-                    check_telegram_replies()
+                # --- EDUCACIÓN IT ---
+                print("\n🚀 PROCESANDO: EDUCACIÓN IT")
+                from src.sites.educacionit import EducacionITBot
+                EducacionITBot(driver).search()
+                check_telegram_replies()
 
-                    # --- ANDREANI ---
-                    print("\n🚀 PROCESANDO: ANDREANI")
-                    from src.sites.andreani import AndreaniBot
-                    AndreaniBot(driver).search()
-                    check_telegram_replies()
+                # --- BBVA ---
+                print("\n🚀 PROCESANDO: BBVA")
+                from src.sites.bbva import BBVABot
+                BBVABot(driver).search()
+                check_telegram_replies()
 
-                    # --- EDUCACIÓN IT ---
-                    print("\n🚀 PROCESANDO: EDUCACIÓN IT")
-                    from src.sites.educacionit import EducacionITBot
-                    EducacionITBot(driver).search()
-                    check_telegram_replies()
+                # --- VICENTE LÓPEZ ---
+                print("\n🚀 PROCESANDO: VICENTE LÓPEZ")
+                from src.sites.vicentelopez import VicenteLopezBot
+                VicenteLopezBot(driver).search()
+                check_telegram_replies()
 
-                    # --- BBVA ---
-                    print("\n🚀 PROCESANDO: BBVA")
-                    from src.sites.bbva import BBVABot
-                    BBVABot(driver).search()
-                    check_telegram_replies()
+                # --- UTN TALENTIA ---
+                print("\n🚀 PROCESANDO: UTN TALENTIA")
+                from src.sites.talentia import TalentiaBot
+                TalentiaBot(driver).search()
+                check_telegram_replies()
 
-                    # --- VICENTE LÓPEZ ---
-                    print("\n🚀 PROCESANDO: VICENTE LÓPEZ")
-                    from src.sites.vicentelopez import VicenteLopezBot
-                    VicenteLopezBot(driver).search()
-                    check_telegram_replies()
+                # --- EMPLEOS IT ---
+                print("\n🚀 PROCESANDO: EMPLEOS IT")
+                EmpleosITBot(driver).search()
+                check_telegram_replies()
 
-                    # --- UTN TALENTIA ---
-                    print("\n🚀 PROCESANDO: UTN TALENTIA")
-                    from src.sites.talentia import TalentiaBot
-                    TalentiaBot(driver).search()
-                    check_telegram_replies()
+                print("\n✅ Ciclo finalizado exitosamente.")
 
-                    # --- EMPLEOS IT ---
-                    print("\n🚀 PROCESANDO: EMPLEOS IT")
-                    EmpleosITBot(driver).search()
-                    check_telegram_replies()
+                send_telegram_message(
+                    f"🏁 <b>Ciclo de búsqueda finalizado.</b>\n"
+                    f"Cerrando proceso. Nos vemos en unas horas."
+                )
 
-                    print("\n✅ Ciclo finalizado exitosamente.")
+            except Exception as error:
+                print(f"\n❌ Error durante la búsqueda: {error}")
 
-                    hours_wait = CHECK_INTERVAL_MINUTES / 60
-                    send_telegram_message(
-                        f"🏁 <b>Ciclo de búsqueda finalizado.</b>\n"
-                        f"💤 Durmiendo {int(hours_wait)}hs hasta el próximo turno."
-                    )
+            finally:
+                print("🔒 Cerrando navegador para liberar memoria.")
+                driver.quit()
 
-                except Exception as error:
-                    print(f"\n❌ Error durante la búsqueda: {error}")
-
-                finally:
-                    print("🔒 Cerrando navegador para liberar memoria.")
-                    driver.quit()
-
-                print(f"💤 Durmiendo {CHECK_INTERVAL_MINUTES} minutos hasta el próximo turno...")
-
-                total_wait_seconds = CHECK_INTERVAL_MINUTES * 60
-                check_interval = 60
-                elapsed = 0
-
-                while elapsed < total_wait_seconds:
-                    try:
-                        from src.listener import check_telegram_replies
-                        check_telegram_replies()
-                    except Exception as e:
-                        print(f"⚠️ Error chequeando Telegram en espera: {e}")
-
-                    time.sleep(check_interval)
-                    elapsed += check_interval
+            sys.exit(0)
 
         except KeyboardInterrupt:
             print("\n👋 Bot detenido manualmente. Terminando ejecución.")
