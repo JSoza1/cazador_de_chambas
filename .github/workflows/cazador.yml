@@ -11,6 +11,10 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
 
+    # Damos permiso explícito al bot para guardar (push) archivos en el repositorio.
+    permissions:
+      contents: write
+
     steps:
       - name: Bajar mi código
         # Importante: Checkout permite al bot leer y modificar los archivos de tu repositorio.

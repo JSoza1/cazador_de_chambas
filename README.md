@@ -150,13 +150,12 @@ Para que el bot te avise al celular, necesitas dos datos sencillos:
 
 La forma más eficiente y desatendida de correr este bot es configurarlo para que se ejecute automáticamente cada 4 horas usando los servidores gratuitos de Github, sin gastar la batería de tu celular o PC.
 
-1.  **Sube este código a tu propio repositorio** (se recomienda que sea Privado).
-2.  En GitHub, entra a tu repositorio y ve a **Settings > Secrets and variables > Actions**.
-3.  Crea un "New repository secret" llamado `TELEGRAM_BOT_TOKEN` y pega ahí el token de tu bot.
-4.  Crea un segundo secreto llamado `TELEGRAM_CHAT_ID` y pega tu ID de usuario.
-5.  ¡Listo! GitHub detectará automáticamente el archivo `.github/workflows/cazador.yml` y comenzará a correr el script según el cronograma.
-    *   Podrás ver el proceso en vivo en la pestaña **Actions**.
-    *   El bot es 100% amnésico en la nube, pero hemos diseñado una función de "Self-Commit" que hace que el propio bot sobreescriba su `seen_jobs.json` y `keywords.json` de vuelta hacia el repositorio al terminar cada ciclo, garantizando que conserve su "memoria".
+1.  **Sube este código a tu propio repositorio** (puede ser Público o Privado).
+2.  **Configura los secretos:** En GitHub, ve a la pestaña **Settings > Secrets and variables > Actions**. Crea un "New repository secret" llamado `TELEGRAM_BOT_TOKEN` con tu token, y otro llamado `TELEGRAM_CHAT_ID` con tu ID.
+3.  **Habilita permisos de escritura (¡CRÍTICO!):** Para que el bot pueda guardar su memoria (`seen_jobs.json`) tras cada búsqueda, debe poder hacer "commits" en tu código. Ve a **Settings > Actions > General**, haz *scroll* hasta abajo a la sección **Workflow permissions**, selecciona **Read and write permissions** y dale a **Save**.
+4.  ¡Listo! GitHub detectará automáticamente el archivo `.github/workflows/cazador.yml` y comenzará a correr el script según el cronograma estipulado.
+    *   Podrás ver cómo arranca cada 4 horas desde la pestaña **Actions**.
+    *   El bot es amnésico en la nube, pero hemos diseñado una arquitectura de "Self-Commit". Gracias a los permisos de escritura del paso 3, el bot sobreescribirá y subirá los archivos `seen_jobs.json`, lo que garantiza que pueda recordar los empleos observados entre una sesión y otra.
 
 ---
 
