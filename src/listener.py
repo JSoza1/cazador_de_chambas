@@ -299,6 +299,7 @@ def check_telegram_replies():
                         send_msg(chat_id, "✅ Oferta archivada correctamente.")
                 else:
                     print("   ⚠️ Comando recibido, pero no detecté ninguna URL en el mensaje original.")
+                    send_msg(chat_id, "⚠️ No pude detectar el link de la oferta. Por favor, asegúrate de responder directamente al mensaje de la oferta.")
 
         if current_max_id > last_id:
             save_last_update_id(current_max_id)

@@ -198,6 +198,13 @@ if __name__ == "__main__":
 
                 print("\n✅ Ciclo finalizado exitosamente.")
 
+                # Esperamos 30 segundos para capturar respuestas rápidas del usuario
+                # antes de guardar el estado y cerrar el proceso.
+                print("⏳ Esperando 30s para capturar respuestas pendientes de Telegram...")
+                time.sleep(30)
+                check_telegram_replies()
+                print("📬 Check final de Telegram completado.")
+
                 send_telegram_message(
                     f"🏁 <b>Ciclo de búsqueda finalizado.</b>\n"
                     f"Cerrando proceso. Nos vemos en unas horas."
