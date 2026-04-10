@@ -88,7 +88,11 @@ class ComputrabajoBot(BaseBot):
                                 print(f"      🌐 ──────────────────────────────")
                                 continue
 
-                            self.notify(f"✨ <b>COMPUTRABAJO MATCH!</b>\n\n📌 {title_text}\n🔗 {link_url}")
+                            self.notify(
+                                f"✨ <b>¡NUEVA OFERTA EN COMPUTRABAJO!</b>\n\n"
+                                f"📌 <b>Cargo:</b> {title_text}\n"
+                                f"🔗 <a href='{link_url}'>Ver Oferta</a>"
+                            )
 
                             self.driver.execute_script(f"window.open('{link_url}', '_blank');")
                             self.random_sleep(2, 4)

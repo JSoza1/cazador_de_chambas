@@ -274,15 +274,24 @@ def check_telegram_replies():
                 entities     = reply_to_message.get("entities", [])
                 original_text = reply_to_message.get("text", "")
 
-                # Método A: Link embebido como text_link en las entidades del mensaje
+                # Método A: Entidades de Telegram.
+                # - 'text_link': link HTML <a href='URL'>texto</a> → la URL está en entity['url']
+                # - 'url': link plano en el texto (como Computrabajo) → la URL está en el texto mismo
                 for entity in entities:
                     if entity["type"] == "text_link":
                         found_url = entity["url"]
                         break
+                    elif entity["type"] == "url":
+                        # Para entidades 'url', extraemos el fragmento del texto original.
+                        # Usamos un slice simple; los offsets de Telegram son UTF-16,
+                        # pero para URLs (ASCII) los valores coinciden con los de Python.
+                        offset = entity.get("offset", 0)
+                        length = entity.get("length", 0)
+                        found_url = original_text[offset:offset + length]
+                        break
 
-                # Método B: URL plana en el texto, extraída con regex.
-                # Más robusto para mensajes con emojis, donde los offsets de Telegram
-                # (UTF-16) pueden desalinearse con los índices de Python (Unicode).
+                # Método B: Regex sobre el texto completo como fallback.
+                # Más robusto cuando el campo 'entities' está vacío o es inesperado.
                 if not found_url:
                     urls_found = re.findall(r'https?://[^\s<>"]+', original_text)
                     if urls_found:
@@ -298,8 +307,11 @@ def check_telegram_replies():
                         history.add_job(found_url)
                         send_msg(chat_id, "✅ Oferta archivada correctamente.")
                 else:
-                    print("   ⚠️ Comando recibido, pero no detecté ninguna URL en el mensaje original.")
-                    send_msg(chat_id, "⚠️ No pude detectar el link de la oferta. Por favor, asegúrate de responder directamente al mensaje de la oferta.")
+                    # Debug: mostramos qué recibió el bot para poder diagnosticar
+                    print(f"   ⚠️ Comando recibido pero no se detectó URL.")
+                    print(f"      Entidades: {entities}")
+                    print(f"      Texto original: {original_text[:200]}")
+                    send_msg(chat_id, "⚠️ No pude detectar el link de la oferta. Asegúrate de responder directamente al mensaje de la oferta.")
 
         if current_max_id > last_id:
             save_last_update_id(current_max_id)
