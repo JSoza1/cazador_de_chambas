@@ -301,7 +301,11 @@ def check_telegram_replies():
                     found_url = normalize_url(found_url)
                     print(f"   📩 Usuario marcó oferta como vista: {found_url[:60]}...")
 
-                    if history.is_seen(found_url):
+                    # Verificamos SOLO contra el historial permanente en disco (seen_jobs),
+                    # NO contra session_seen. Si la URL está solo en session_seen (memoria),
+                    # fue encontrada en esta misma ejecución pero el usuario todavía no la marcó
+                    # como vista permanentemente: debemos guardarla a disco.
+                    if normalize_url(found_url) in history.seen_jobs:
                         send_msg(chat_id, "ℹ️ La URL ya se encuentra en el historial.")
                     else:
                         history.add_job(found_url)
