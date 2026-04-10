@@ -134,9 +134,9 @@ class BaseBot(ABC):
         """
         Verifica si una oferta ya fue vista (historial permanente o sesión actual).
 
-        Si la URL es nueva, la registra TANTO en el historial permanente (seen_jobs.json)
-        como en el cache de sesión, para evitar notificaciones duplicadas en el mismo ciclo
-        Y en ejecuciones futuras (crítico para GitHub Actions one-shot).
+        Si la URL es nueva, la registra en el cache de sesión (memoria) para evitar
+        notificaciones duplicadas dentro del mismo ciclo. El archivado permanente
+        solo ocurre cuando el usuario responde 'paso' en Telegram.
 
         Args:
             url (str): URL de la oferta a verificar.
@@ -153,9 +153,9 @@ class BaseBot(ABC):
         if clean_url in history.session_seen:
             print(f"         🔁  Ya notificada en este ciclo: {clean_url[:70]}")
             return False
-        # Persistimos en disco inmediatamente para que GitHub Actions recuerde
-        # esta oferta en el próximo ciclo (no solo en memoria de sesión).
-        history.add_job(url)
+        # Marcamos solo en memoria de sesión.
+        # El guardado permanente lo decide el usuario con 'paso' en Telegram.
+        history.mark_notified(url)
         return True
 
     def check_language_in_description(self, url):
