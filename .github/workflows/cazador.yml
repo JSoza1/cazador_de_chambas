@@ -51,8 +51,8 @@ jobs:
         # Esto hace Add de los archivos JSON si sufrieron alguna modificación,
         # crea un Commit y hace Push para actualizar el repo y conservar la memoria de cara al próximo ciclo.
         run: |
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "action@github.com"
+          git config --global user.name "JSoza1"
+          git config --global user.email "192634955+JSoza1@users.noreply.github.com"
 
           # Usamos -f para forzar el add aunque .gitignore los liste (por si acaso).
           git add -f seen_jobs.json last_update.json keywords.json || true
