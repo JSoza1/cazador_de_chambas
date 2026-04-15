@@ -1,9 +1,9 @@
 name: Cazador de Chambas
 
 on:
-  schedule:
+  # schedule:  - Comentado para detener la automatización
     # Se ejecuta en el minuto 0 cada 4 horas. (Horario UTC)
-    - cron: '0 */4 * * *'
+    # - cron: '0 */4 * * *'   -  Comentado por ahora
   # Botón manual para probar el bot desde la pestaña Actions.
   workflow_dispatch:
 
